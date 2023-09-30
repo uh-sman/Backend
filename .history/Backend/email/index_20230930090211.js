@@ -6,7 +6,7 @@ let config = {
     port:465,
     secure:true,
     auth:{
-        type:"OAuth2",
+        type:'OAUTH2',
         user: process.env.AUTH_EMAIL,
         password: process.env.AUTH_PASSWORD,
         clientId:process.env.AUTH_CLIENT_ID,

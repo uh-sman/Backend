@@ -30,7 +30,7 @@ const sendOTP = asyncHandler(async (req, res) => {
     subject,
     html: `<p>Your otp is  ${token}</p>`,
     text,
-    expires:300,
+    expires:3599,
     // otp:`Your OTP is `
   };
   // const data = {from,to,subject,text}

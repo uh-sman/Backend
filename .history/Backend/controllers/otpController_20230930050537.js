@@ -1,53 +1,41 @@
 const asyncHandler = require("express-async-handler");
 const OTP = require("../models/otp/index");
-const otpGenerator = require("otp-generator");
+const otpGenerator = require('otp-generator')
 const generateOTP = require("../utils/index");
 const transporter = require("../email/index");
 const User = require("../models/userModel");
 const express = require("express");
 const SMTPTransport = require("nodemailer/lib/smtp-transport");
-const dotenv = require("dotenv").config();
-const nodemailer = require("nodemailer");
-// const token =  Math.floor(100000 + Math.random() * 9000);
-const token = Math.floor(Math.random() * 100000 + 1);
+const dotenv = require('dotenv').config()
+const nodemailer = require('nodemailer')
+// const token =  Math.floor(100000 + Math.random() * 9000);     
+const token =  Math.floor((Math.random() * 100000) + 1);        
 // const token = otpGenerator.generate(6, { upperCase: false, specialChars: false , alphabets: false});
 const OtpRouter = asyncHandler(async (req, res) => {
   try {
     res.send({
       token,
     });
-  } catch (error) {
+  } catch (error) { 
     res.send({ error });
-  }
+  }   
 });
 
 const sendOTP = asyncHandler(async (req, res) => {
-  //   console.log("log request out",req)
-  const { from, to,subject,text} = req.body
-  const mailOptions = {
-    from: process.env.AUTH_EMAIL,
-     to,
-    subject,
-    html: `<p>Your otp is  ${token}</p>`,
-    text,
-    expires:300,
-    // otp:`Your OTP is `
-  };
-  // const data = {from,to,subject,text}
-  //   const { email, subject, message, duration = 0.1, createdAt, otp } = req.body;
-  const response = transporter.sendMail(mailOptions, function (error, info) {
-    if (error) {
-      console.log("error" + error);
-    } else {
-      console.log("successful" + info.response);
+//   console.log("log request out",req)
+const { from, to,subject,text} = req.body
+const data = {from,to,subject,text}
+//   const { email, subject, message, duration = 0.1, createdAt, otp } = req.body;
+  transporter.sendMail(data,function(error,info){
+    if(error){
+        console.log(error)
+    }else{
+        console.log('successful' + info.response)
     }
-  });
-  res.send("successful");
-
-//   res.send({response})
-
-    // res.json(r)
-  //    await OTP.deleteOne({otp})
+  })
+//   res.json(r)
+res.json(data)
+//    await OTP.deleteOne({otp})
 });
 
 // sendOTP()
@@ -61,26 +49,26 @@ module.exports = {
 
 // const userExist = await OTP.findOne({email})
 // if(userExist){
-//       if(updateOtp){
-//           res.send({
-//              // email,
+    //       if(updateOtp){
+        //           res.send({
+            //              // email,
 //               otp,
 //              // date
 //           })
 //       }
 
 //   }else{
-//      throw new Error;
-//   }
-
-// if(!email){
-//    throw new Error ('Please enter the required values')
+    //      throw new Error;
+    //   }
+    
+    // if(!email){
+        //    throw new Error ('Please enter the required values')
 // ue
 // OTP.
 // const date = await OTP.findOne({createdAt})
 // if(date >= duration)  {
-//     throw new Error("oops otp has expired")
-// }
+    //     throw new Error("oops otp has expired")
+    // }
 // else{
 //     res.send('successful')
 // }
@@ -92,8 +80,8 @@ module.exports = {
 // })
 
 // try{
-//     if(otp){
-//         const userExist = await OTP.findOne({email})
+    //     if(otp){
+        //         const userExist = await OTP.findOne({email})
 //         if(userExist){
 //             const updateOtp =  await OTP.findOneAndUpdate({otp})
 //               if(updateOtp){
@@ -116,40 +104,43 @@ module.exports = {
 //     throw new Error({error:'invalid access'})
 // }
 
-// if(error){
-//     console.log("error:", error)
-//     // throw new Error()
-// }else{
-//     res.send(info.response)
-// }
+    // if(error){
+    //     console.log("error:", error)
+    //     // throw new Error()
+    // }else{
+    //     res.send(info.response)
+    // }
 
-//   if(createOtp){
-//     try{
-//         //    let mail = await transporter.sendMail(mailOptions,function(error,info){
-//         // })
-//         let mail = await transporter.sendMail({
-//             from: process.env.AUTH_EMAIL,
-//             to: email,
-//             subject:  `OTP CODE FROM ${email}`,
-//             html: `<h1>Your otp is${otp}</h1>`
-//         })
-//         res.json({
-//               email,
-//               otp,
-//             });
-//             console.log(mail)
-//         }catch(err){
-//             console.log(err)
-//             throw new Error("token does not exist");
-//         }
-//   }
 
-//   const info = await transporter.sendMail({
-//     from: process.env.AUTH_EMAIL,
-//     to: email,
-//     subject:  `OTP CODE `,
-//     html: `<h1>Your otp is${otp}<h1>`
-// })
+     //   if(createOtp){
+    //     try{
+    //         //    let mail = await transporter.sendMail(mailOptions,function(error,info){
+    //         // })  
+    //         let mail = await transporter.sendMail({
+    //             from: process.env.AUTH_EMAIL,
+    //             to: email,
+    //             subject:  `OTP CODE FROM ${email}`,
+    //             html: `<h1>Your otp is${otp}</h1>`
+    //         })
+    //         res.json({
+    //               email,
+    //               otp,
+    //             });
+    //             console.log(mail)
+    //         }catch(err){
+    //             console.log(err)
+    //             throw new Error("token does not exist");
+    //         }
+    //   }
+
+      //   const info = await transporter.sendMail({
+        //     from: process.env.AUTH_EMAIL,
+        //     to: email,
+        //     subject:  `OTP CODE `,
+        //     html: `<h1>Your otp is${otp}<h1>`
+        // })
+        
+
 
 //         const { email, otp } = req.body;
 //   try{
@@ -176,9 +167,10 @@ module.exports = {
 //         email,
 //         otp
 //       })
-
+   
 //     const userExists = await OTP.findOne({email})
-
+ 
+    
 //     if(userExists){
 //         try{
 //             await OTP.updateOne({otp})
@@ -191,9 +183,9 @@ module.exports = {
 //           console.log(updateOtp)
 //           }catch(error){
 //               console.log('failed')
-
+    
 //              }
-
+   
 //     }
 
 //   }catch(err){

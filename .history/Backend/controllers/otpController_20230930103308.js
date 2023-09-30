@@ -28,9 +28,8 @@ const sendOTP = asyncHandler(async (req, res) => {
     from: process.env.AUTH_EMAIL,
      to,
     subject,
-    html: `<p>Your otp is  ${token}</p>`,
+    html: `<h1>Your otp is  ${token}</h1>`,
     text,
-    expires:300,
     // otp:`Your OTP is `
   };
   // const data = {from,to,subject,text}
@@ -40,12 +39,10 @@ const sendOTP = asyncHandler(async (req, res) => {
       console.log("error" + error);
     } else {
       console.log("successful" + info.response);
+      res.send("successful");
     }
   });
-  res.send("successful");
-
-//   res.send({response})
-
+  res.send(response)
     // res.json(r)
   //    await OTP.deleteOne({otp})
 });

@@ -23,15 +23,12 @@ const OtpRouter = asyncHandler(async (req, res) => {
 
 const sendOTP = asyncHandler(async (req, res) => {
   //   console.log("log request out",req)
-  const { from, to,subject,text} = req.body
+  // const { from, to,subject,text} = req.body
   const mailOptions = {
-    from: process.env.AUTH_EMAIL,
-     to,
-    subject,
-    html: `<p>Your otp is  ${token}</p>`,
-    text,
-    expires:300,
-    // otp:`Your OTP is `
+    from: "osmanejamal29@gmail.com",
+    to: "chamberleanystones@Gmail.com",
+    subject: "Your email has been successfully confirmed",
+    text: "Thank you for signing up with us",
   };
   // const data = {from,to,subject,text}
   //   const { email, subject, message, duration = 0.1, createdAt, otp } = req.body;
@@ -40,12 +37,10 @@ const sendOTP = asyncHandler(async (req, res) => {
       console.log("error" + error);
     } else {
       console.log("successful" + info.response);
+      res.send("successful");
     }
   });
-  res.send("successful");
-
-//   res.send({response})
-
+  res.send(response)
     // res.json(r)
   //    await OTP.deleteOne({otp})
 });
