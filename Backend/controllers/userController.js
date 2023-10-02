@@ -3,14 +3,17 @@ const bcrypt = require('bcryptjs')
 const asyncHandler = require('express-async-handler')
 const User = require('../models/userModel')
 const Profile = require('../models/profileModels')
+// const Verification = require('../models/profileModels')
 // const generateToken = require('../token/generateToken')
 const userVerification = require('../models/userVerification/userverification')
-
+const {sendOTP} = require('../controllers/otpController')
 const nodemailer = require('nodemailer');
 const{ v4: uuidv4 } = require('uuid')
+const token = Math.floor(100000 + Math.random() * 100000 + 1);
+
 // let otpGenerator =  Math.floor(1000 + Math.random() * 9000)
 
-
+let isVerified;
 // const OtpRouter =asyncHandler(async(req,res) => {
 //   try{
 //       const {email,subject,message,duration} = req.body
@@ -24,7 +27,7 @@ const{ v4: uuidv4 } = require('uuid')
 //   }
 // })
 
-const registerUser = asyncHandler(async (req,res) => {
+const registerUser = asyncHandler(async (req,res,next) => {
     const {name, email, password} = req.body
 
     if(!name || !email || !password) {
@@ -63,6 +66,8 @@ const registerUser = asyncHandler(async (req,res) => {
         res.status(400)
         throw new Error('Invalid credentials')
     }
+    next();
+    sendOTP()
 
     // res.send(req.body)
 })
@@ -91,8 +96,8 @@ const loginUser = asyncHandler(async (req, res) => {
     }
   })
 const profile = asyncHandler(async (req,res) => {
-    const {Firstname,Lastname,Dob} = req.body
-    if(!(Firstname&&Lastname&&Dob)){
+    const {Firstname,Lastname,Dob,phoneNo} = req.body
+    if(!(Firstname&&Lastname&&Dob&&phoneNo)){
       res.status(500)
       throw new Error("all fields are required")
     }
@@ -101,25 +106,74 @@ const profile = asyncHandler(async (req,res) => {
       res.status(500)
      throw new Error(`user with username ${Lastname} already exists`)
     } 
+   const data = {
+    Firstname,
+    Lastname,
+    Dob,
+    phoneNo
+  }
+    const profile = await Profile.create(data)
+   res.send({profile})
    
-    const profile = await Profile.create({
-      Firstname,Lastname,Dob
-    })
+      
    
-    if(profile){
-    res.status(201).json({Firstname,Lastname,Dob})
-    }
-  
 })
-const getProfile =async(req,res)=>{
-res.send("Hellooooooo")
-}
+const getProfile = asyncHandler(async(req,res)=>{
+ const get = await Profile.findOne({Lastname:'Umar'})
+res.send({get})
+})
 const generateToken = (id) => {
     return jwt.sign({ id }, process.env.JWT_SECRET, {
       expiresIn: '30d',
     })
   }
+const verify = asyncHandler(async(req,res) => {
+const {phoneNo,otp} = req.body
+const phoneInDatabase = await Profile.findOne({phoneNo})
+if(!phoneNo){
+  console.log('no phone number')
+  throw new Error('failed with phoneNo')
+  // return null
+}
+// if(phoneNo === phoneInDatabase) {
+//   res.send("phoneNo already exists in database, if you choose to update ?")
+//   console.log("phoneNo already exists in database, if you choose to update ?")
+// }
 
+// if(phoneNo)
+// if()
+// if(otp === token){
+//   res.send('successful')
+// }
+// else{
+//   throw new Error('otp doesn`t match')
+// }
+// if(phoneNo && !otp){
+//   throw new Error('failed')
+// }
+
+else{
+const verified = await Profile.updateOne({isVerified: true})
+
+//  const verified = await Verification.
+// if(otp !== token ){
+//   throw new Error("wrong otp failed")
+// }
+ if(!verified){
+console.log('failed to verify phoneNo')
+return null
+ }else{
+  res.send(phoneNo)
+ }
+//  await Profile.findOne({isVerified}).then
+
+}
+})
+const getVerifyPin =async (req,res) => {
+  console.log(token)
+  res.send({otp:token})
+
+}
 //   module.export = {generateToken}
 
 module.exports = {
@@ -127,5 +181,21 @@ module.exports = {
     loginUser,
     profile,
     getProfile,
+    verify,
+    getVerifyPin
     // OtpRouter
 }
+
+// const verified = await Profile.updateOne({isVerified: true})
+
+// //  const verified = await Verification.
+// // if(otp !== token ){
+// //   throw new Error("wrong otp failed")
+// // }
+
+//  if(!verified){
+// console.log('failed to verify phoneNo')
+// return null
+//  }else{
+//   res.send(phoneNo)
+//  }

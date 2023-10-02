@@ -28,8 +28,8 @@ const sendOTP = asyncHandler(async (req, res) => {
     from: process.env.AUTH_EMAIL,
      to,
     subject,
-    html: `<p>Your otp is  ${token}</p>`,
-    text,
+    html: `<p>${text}</p>`,
+    // text,
     expires:300,
     // otp:`Your OTP is `
   };
