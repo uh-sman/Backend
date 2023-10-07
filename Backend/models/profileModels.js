@@ -3,7 +3,7 @@ const mongoose = require('mongoose')
 //   isVerified:Boolean
 // })
 
-const profileSchema = mongoose.Schema(
+const profileSchema = new mongoose.Schema(
   {
     Firstname: {
       type: String,
@@ -25,7 +25,7 @@ const profileSchema = mongoose.Schema(
       // isVerified:isVerifiedSchema  ? isVerifiedSchema.length != 0 : false,
     },
     isVerified:{
-      default : false,
+      default : false, 
       type:Boolean
     },
   },

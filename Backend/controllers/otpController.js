@@ -23,12 +23,14 @@ const OtpRouter = asyncHandler(async (req, res) => {
 
 const sendOTP = asyncHandler(async (req, res) => {
   //   console.log("log request out",req)
+  const url = 'http://localhost:4000/verify/${verificationToken}'
   const { from, to,subject,text} = req.body
   const mailOptions = {
     from: process.env.AUTH_EMAIL,
      to,
     subject,
-    html: `<p>${text}</p>`,
+    // html: `<p>${text}</p>`,
+    html: `<a href = ''>${text}</a>`,
     // text,
     expires:300,
     // otp:`Your OTP is `

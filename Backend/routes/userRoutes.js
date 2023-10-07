@@ -9,13 +9,16 @@ const {
     profile,
     getProfile,
     verify,
-    getVerifyPin
+    getVerifyPin,
+    updatePassword
     // OtpRouter
 } = require('../controllers/userController')
 const {sendOTP,OtpRouter} = require('../controllers/otpController')
 // router.post('/login', sendOTP,loginUser)
-router.post('/login',sendOTP,loginUser)
-router.post('/register',sendOTP,registerUser)
+router.post('/login',loginUser)
+router.post('/register',registerUser)
+// update password route
+router.post('/password', updatePassword)
 // router.route('/register').post(registerUser).post(sendOTP)
 // router.post('/profile',  profile)
 router.route('/profile').post(profile).get(getProfile)
