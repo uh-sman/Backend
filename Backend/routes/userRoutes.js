@@ -22,7 +22,8 @@ router.post('/password', updatePassword)
 // router.route('/register').post(registerUser).post(sendOTP)
 // router.post('/profile',  profile)
 router.route('/profile').post(profile).get(getProfile)
-router.route('/verify').get(getVerifyPin).post(verify)
+router.post('/verify',verify)
+router.route('/verify"/:userId/:uniqueString"').get(getVerifyPin)
 router.route('/otp').get(OtpRouter).post(sendOTP)
 
 module.exports = router

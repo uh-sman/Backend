@@ -8,6 +8,7 @@ const Profile = require("../models/profileModels");
 const userVerification = require("../models/userVerification/userverification");
 // const { sendOTP } = require("../controllers/otpController");
 const nodemailer = require("nodemailer");
+const transporter = require("../email/index");
 const { v4: uuidv4 } = require("uuid");
 const token = Math.floor(100000 + Math.random() * 100000 + 1);
 
@@ -41,6 +42,7 @@ const registerUser = asyncHandler(async (req, res, next) => {
     name,
     email,
     password: hashedPassword,
+    verified: false,
   });
 
   if (user) {
@@ -60,12 +62,13 @@ const registerUser = asyncHandler(async (req, res, next) => {
   // res.send(req.body)
 });
 
-// TODO:LOGIN 
+// TODO:LOGIN
 const loginUser = asyncHandler(async (req, res) => {
   const { email, password, otp } = req.body;
   const user = await User.findOne({ email });
   if (user && (await bcrypt.compare(password, user.password))) {
     res.json({
+      message:"LOGIN SUCCESSFUL",
       _id: user.id,
       name: user.name,
       email: user.email,
@@ -115,13 +118,13 @@ const verify = asyncHandler(async (req, res) => {
     console.log("no phone number");
     throw new Error("failed with phoneNo");
     // return null
-  }  
+  }
   // if(phoneNo === phoneInDatabase){
   //   res.send('true')
   // }
-   await  Profile.findOneAndUpdate({  isVerified: true });
+  await Profile.findOneAndUpdate({ isVerified: true });
   //  Profile.save()
-   res.send(phoneInDatabase)
+  res.send(phoneInDatabase);
   // if (verified) {
   //   res.send(phoneInDatabase)
   //   // throw new Error({message:"failed to verify phoneNo"})
@@ -148,16 +151,38 @@ const verify = asyncHandler(async (req, res) => {
   // res.send(phoneInDatabase);
 });
 // TODO:VERIFY PIN
-const getVerifyPin = async (req, res) => {
-  console.log(token);
-  res.send({ otp: token });
+const getVerifyPin = (req, res) => {
+  let {userId, uniqueString} = req.params
+ UserActivation.find({userId}).then((result) => {
+  if (result.length >  0) {
+    const {expiresAt} = result[0]
+    if (expiresAt < Date.now()) {
+      console.log('link has expired')
+      userVerification.deleteOne({userId}).then((res) => {}).catch((err) => {
+        console.log(err)
+      })
+    }
+  }else{
+    let message = 'An error occurred while verifying'
+    res.redirect(`/verify/verified/errors=true&message=${message}`)
+  }
+ }).catch((error) => {
+  console.log(error);
+  let message = 'An error occurred while verifying'
+  res.redirect(`/verify/verified/errors=true&message=${message}`)
+ })
+  // if(!findUserVerification){
+  //   throw new Error;
+  //   let
+  // } 
+  // console.log(token);
+  // res.send({ otp: token });
 };
-
-
 
 // TODO:UpdatePassword
 const updatePassword = asyncHandler(async (req, res) => {
   const { email, password } = req.body;
+  // const {email,password } = req.
 
   const userExists = await User.findOne({ email });
   if (!userExists) {
@@ -170,11 +195,13 @@ const updatePassword = asyncHandler(async (req, res) => {
   const salt = await bcrypt.genSalt(10);
   const hashedPassword = await bcrypt.hash(password, salt);
   // res.send(hashedPassword)
-  const updatedPassword = await User.findOneAndUpdate({ password: hashedPassword });
+  const updatedPassword = await User.findOneAndUpdate({
+    password: hashedPassword,
+  });
   if (!updatedPassword) {
-    throw new Error();
+    throw new Error('failed');
   }
-  res.send(userExists)
+  res.send(userExists);
   //  else {
   //   res.send(userExists);
   // }
@@ -182,37 +209,48 @@ const updatePassword = asyncHandler(async (req, res) => {
 });
 //   module.export = {generateToken}
 
+const verificationEmail = async ({ _id, email }, res) => {
+  const currentUrl = "http://localhost:4000/";
 
-const sendOTP = asyncHandler(async (req, res) => {
-  //   console.log("log request out",req)
-  const url = 'http://localhost:4000/verify/${generateToken}'
-  const { from, to,subject,text} = req.body
+  const uniqueString = uuidv4() + _id;
   const mailOptions = {
     from: process.env.AUTH_EMAIL,
-     to,
+    to,
     subject,
     // html: `<p>${text}</p>`,
-    html: `<a href = '${url}'>${text}</a>`,
+    html: `<p>Verify your email address to complete the signup into your account.</p> <p>Click <a href=${
+      currentUrl + "/verify" + _id + "/" + uniqueString
+    }>here</a> to verify</p>`,
+    // html: `<a href = '${url}'>${text}</a>`,
     // text,
-    expires:300,
+    expires: 300,
     // otp:`Your OTP is `
   };
-  // const data = {from,to,subject,text}
-  //   const { email, subject, message, duration = 0.1, createdAt, otp } = req.body;
-  const response = transporter.sendMail(mailOptions, function (error, info) {
+
+  const salt = await bcrypt.genSalt(10);
+  const hashedUniqueString = await bcrypt.hash(uniqueString, salt);
+  if (!hashedUniqueString) {
+    res.send("failed");
+  }
+  const newVerification = new userVerification({
+    userId: _id,
+    uniqueString: hashedUniqueString,
+    createdAt: Date.now(),
+    expiresAt: Date.now() + 300000,
+  });
+  newVerification.save();
+  if (!newVerification) {
+    res.send("failed");
+  }
+  transporter.sendMail(mailOptions, function (error, info) {
     if (error) {
       console.log("error" + error);
     } else {
       console.log("successful" + info.response);
     }
   });
-  res.send("successful");
+};
 
-//   res.send({response})
-
-    // res.json(r)
-  //    await OTP.deleteOne({otp})
-});
 module.exports = {
   registerUser,
   loginUser,
@@ -272,3 +310,34 @@ module.exports = {
 // }
 
 //  res.send({message:"route is working"})
+
+// const sendOTP = asyncHandler(async (req, res) => {
+//   //   console.log("log request out",req)
+//   const url = 'http://localhost:4000/verify/${generateToken}'
+//   const { from, to,subject,text} = req.body
+//   const mailOptions = {
+//     from: process.env.AUTH_EMAIL,
+//      to,
+//     subject,
+//     // html: `<p>${text}</p>`,
+//     html: `<a href = '${url}'>${text}</a>`,
+//     // text,
+//     expires:300,
+//     // otp:`Your OTP is `
+//   };
+//   // const data = {from,to,subject,text}
+//   //   const { email, subject, message, duration = 0.1, createdAt, otp } = req.body;
+//   const response = transporter.sendMail(mailOptions, function (error, info) {
+//     if (error) {
+//       console.log("error" + error);
+//     } else {
+//       console.log("successful" + info.response);
+//     }
+//   });
+//   res.send("successful");
+
+// //   res.send({response})
+
+//     // res.json(r)
+//   //    await OTP.deleteOne({otp})
+// });
