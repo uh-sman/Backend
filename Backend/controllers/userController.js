@@ -17,6 +17,11 @@ const token = Math.floor(100000 + Math.random() * 100000 + 1);
 let isVerified;
 // TODO: REGISTER
 const registerUser = asyncHandler(async (req, res, next) => {
+  res.setHeader('Access-Control-Allow-Origin', ['http://localhost:3000',"https://dcanestate.onrender.com"]);
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
+  res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With,content-type');
+  res.setHeader('Access-Control-Allow-Credentials', true);
+  next();
   const { name, email, password } = req.body;
 
   if (!name || !email || !password) {
