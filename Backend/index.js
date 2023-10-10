@@ -5,7 +5,9 @@ const connectDB = require("./config/db");
 const cors = require('cors')
 const app = express();
 app.use(cors({
-  origin: ["*",'https://dcanestate.onrender.com'],
+  origin: "*",
+  control:true,
+  methods:['GET, POST, OPTIONS, PUT, PATCH, DELETE']
   // Access-Control-Allow-Origin:
 }))
 // const { DEVELOPMENT } = process.env;
