@@ -5,7 +5,9 @@ const dotenv = require("dotenv").config();
 const docs = require('./docs/index')
 const morgan  = require("morgan");
 const swaggerUI = require('swagger-ui-express')
+const userRoutes = require('./routes/userRoutes')
 const {errorHandler,notFound} = require('./middleware/errorMiddleware')
+const listingRoutes = require('./routes/listings/index')
 // const errorPage = require('./middleware/errorMiddleware')
 const connectDB = require("./config/db");
 const cors = require('cors')
@@ -20,12 +22,15 @@ app.use(
 )
 
 if(process.env.NODE_ENV === 'development'){
-  app.use(morgan('dev'))
+  app.use(morgan('combined'))
 }
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
+app.use("/api/users", userRoutes);
+app.use("/listing", listingRoutes);
+// app.use("/listing", require("./routes/listings/index"));
 
 const _dirname = path.resolve();
 app.use('/uploads',  express.static(path.join(_dirname, '/uploads')));
@@ -39,8 +44,6 @@ app.use('/uploads',  express.static(path.join(_dirname, '/uploads')));
 
 app.use(notFound);
 app.use(errorHandler);
-app.use("/", require("./routes/userRoutes"));
-app.use("/listing", require("./routes/listings/index"));
 // app.use(cors(corsOption))
 // app.use(cors())
 const PORT = process.env.PORT  || 4000;

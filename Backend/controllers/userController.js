@@ -51,16 +51,16 @@ const authUser = asyncHandler(async (req, res) => {
 // TODO: REGISTER
 const registerUser = asyncHandler(async (req, res, next) => {
 
-const schema = Joi.object({
-  name: Joi.string().required(),
-    email: Joi.string().email().required(),
-    phoneNumber:Joi.string().required(),
-    confirmPassword: Joi.string().required(),
-    // year: Joi.string().valid('Freshman', 'Sophomore',"Junior","Senior").required(),
-    // university: Joi.string().valid('University of St Thomas', 'University of Minnesota').required(),
-    // password: Joi.string().required(),
-    // idImage:Joi.string().required()
-})
+// const schema = Joi.object({
+//   name: Joi.string().required(),
+//     email: Joi.string().email().required(),
+//     phoneNumber:Joi.string().required(),
+//     // confirmPassword: Joi.string().required(),
+//     // year: Joi.string().valid('Freshman', 'Sophomore',"Junior","Senior").required(),
+//     // university: Joi.string().valid('University of St Thomas', 'University of Minnesota').required(),
+//     // password: Joi.string().required(),
+//     // idImage:Joi.string().required()
+// })
 
 
 const {
@@ -70,19 +70,19 @@ const {
   confirmPassword
 } = req.body
 
-if (!name || !email || !password || !confirmPassword) {
+if (!name || !email || !password) {
   res.status(400);
   throw new Error("please add all fields");
 }
 
 
  
-const {error , value } = schema.validate(req?.body);
+// const {error , value } = schema.validate(req?.body);
 
-if(error) {
- res.status(401);
- throw new Error('Missing parameters')
-}
+// if(error) {
+//  res.status(401);
+//  throw new Error('Missing parameters')
+// }
   // check if userExists
   const userExists = await User.findOne({ email });
 
