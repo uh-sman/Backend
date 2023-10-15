@@ -3,32 +3,86 @@ const bcrypt = require("bcryptjs");
 const asyncHandler = require("express-async-handler");
 const User = require("../models/userModel");
 const Profile = require("../models/profileModels");
-// const Verification = require('../models/profileModels')
-// const generateToken = require('../token/generateToken')
 const userVerification = require("../models/userVerification/userverification");
-// const { sendOTP } = require("../controllers/otpController");
 const nodemailer = require("nodemailer");
 const transporter = require("../email/index");
 const { v4: uuidv4 } = require("uuid");
+const Joi = require("joi");
+const url = require('url')
 const token = Math.floor(100000 + Math.random() * 100000 + 1);
-
-// let otpGenerator =  Math.floor(1000 + Math.random() * 9000)
+function fullUrl(req){
+  return url.format({
+    host: req.get('host')
+  })
+}
+let otpGenerator =  Math.floor(1000 + Math.random() * 9000)
 
 let isVerified;
+
+const authUser = asyncHandler(async (req, res) => {
+  const schema = Joi.object({
+    email: Joi.string().required(),
+    password: Joi.string().required(),
+  });
+  const { error, value } = schema.validate(req?.body);
+  if (error) {
+    res.status(401);
+    throw new Error("Email and password is required");
+    // throw new Error('Req body require')
+  }
+  const { email, password } = req.body;
+
+  const user = await User.findOne({ email });
+
+  if (user && (await user.matchPassword(password))) {
+    res.json({
+      _id: user._id,
+      name: user.name,
+      email: user.email,
+      university:user.university,
+      // isAdmin: user.isAdmin,
+      token: generateToken(user._id),
+    });
+  } else {
+    res.status(401);
+    throw new Error("Invalid email or password");
+  }
+});
 // TODO: REGISTER
 const registerUser = asyncHandler(async (req, res, next) => {
-  res.setHeader('Access-Control-Allow-Origin', ['http://localhost:3000',"https://dcanestate.onrender.com"]);
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
-  res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With,content-type');
-  res.setHeader('Access-Control-Allow-Credentials', true);
-  next();
-  const { name, email, password } = req.body;
 
-  if (!name || !email || !password) {
-    res.status(400);
-    throw new Error("please add all fields");
-  }
+const schema = Joi.object({
+  name: Joi.string().required(),
+    email: Joi.string().email().required(),
+    phoneNumber:Joi.string().required(),
+    confirmPassword: Joi.string().required(),
+    // year: Joi.string().valid('Freshman', 'Sophomore',"Junior","Senior").required(),
+    // university: Joi.string().valid('University of St Thomas', 'University of Minnesota').required(),
+    // password: Joi.string().required(),
+    // idImage:Joi.string().required()
+})
 
+
+const {
+  name, 
+  email, 
+  password,
+  confirmPassword
+} = req.body
+
+if (!name || !email || !password || !confirmPassword) {
+  res.status(400);
+  throw new Error("please add all fields");
+}
+
+
+ 
+const {error , value } = schema.validate(req?.body);
+
+if(error) {
+ res.status(401);
+ throw new Error('Missing parameters')
+}
   // check if userExists
   const userExists = await User.findOne({ email });
 
@@ -37,6 +91,13 @@ const registerUser = asyncHandler(async (req, res, next) => {
     throw new Error("User already exists");
   }
 
+  let passwordCheck =  password === confirmPassword
+if(passwordCheck === false) {
+ res.status(400).json({
+    // status: res.status(401),
+    message:"oops passwords don`t match"
+  })
+}
   // HASH PASSWORD
 
   const salt = await bcrypt.genSalt(10);
@@ -91,7 +152,7 @@ const profile = asyncHandler(async (req, res) => {
     res.status(500);
     throw new Error("all fields are required");
   }
-  const profileExists = await Profile.findOne({ Lastname });
+  const profileExists = await Profile.findOne({ Lastname }).select("-password")
   if (profileExists) {
     res.status(500);
     throw new Error(`user with username ${Lastname} already exists`);
@@ -346,3 +407,13 @@ module.exports = {
 //     // res.json(r)
 //   //    await OTP.deleteOne({otp})
 // });
+
+
+// res.setHeader('Access-Control-Allow-Origin', ['http://localhost:3000',"https://dcanestate.onrender.com"]);
+// res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
+// res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With,content-type');
+// res.setHeader('Access-Control-Allow-Credentials', true);
+// next();
+
+
+

@@ -2,13 +2,14 @@ const express = require("express");
 const path = require('path')
 const colors = require("colors");
 const dotenv = require("dotenv").config();
+const docs = require('./docs/index')
 const morgan  = require("morgan");
+const swaggerUI = require('swagger-ui-express')
 const {errorHandler,notFound} = require('./middleware/errorMiddleware')
 // const errorPage = require('./middleware/errorMiddleware')
 const connectDB = require("./config/db");
 const cors = require('cors')
 const app = express();
-const PORT = 4000 || process.env.DEVELOPMENT;
 connectDB();
 
 
@@ -29,16 +30,22 @@ app.use(express.urlencoded({ extended: false }));
 const _dirname = path.resolve();
 app.use('/uploads',  express.static(path.join(_dirname, '/uploads')));
   if(process.env.NODE_ENV === 'production'){
-  app.use('/', )
-};
+  app.use('/', swaggerUI.serve, swaggerUI.setup(docs))
+}else{
+  app.use("/", swaggerUI.serve,  swaggerUI.setup(docs))
+}
+
+
+
 app.use(notFound);
 app.use(errorHandler);
 app.use("/", require("./routes/userRoutes"));
 app.use("/listing", require("./routes/listings/index"));
 // app.use(cors(corsOption))
 // app.use(cors())
+const PORT = process.env.PORT  || 4000;
 app.listen(PORT, () => {
-  console.log({ message: "hello" });
+  console.log(`Server running in ${process.env.NODE_ENV} mode on port ${PORT}`.yellow.bold);
 });
 
 
