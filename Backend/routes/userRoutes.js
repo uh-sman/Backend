@@ -15,10 +15,10 @@ const {
 } = require('../controllers/userController')
 const {sendOTP,OtpRouter} = require('../controllers/otpController')
 // router.post('/login', sendOTP,loginUser)
-router.route('/').post(registerUser)
+router.route('/register').post(registerUser)
 router.post('/login',  loginUser)
 // update password route
-router.post('/password', updatePassword)
+router.route('/forgot-password').post(updatePassword)
 // router.route('/register').post(registerUser).post(sendOTP)
 // router.post('/profile',  profile)
 router.route('/profile').post(profile).get(getProfile)

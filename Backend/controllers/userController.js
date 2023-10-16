@@ -50,19 +50,6 @@ const authUser = asyncHandler(async (req, res) => {
 });
 // TODO: REGISTER
 const registerUser = asyncHandler(async (req, res, next) => {
-
-// const schema = Joi.object({
-//   name: Joi.string().required(),
-//     email: Joi.string().email().required(),
-//     phoneNumber:Joi.string().required(),
-//     // confirmPassword: Joi.string().required(),
-//     // year: Joi.string().valid('Freshman', 'Sophomore',"Junior","Senior").required(),
-//     // university: Joi.string().valid('University of St Thomas', 'University of Minnesota').required(),
-//     // password: Joi.string().required(),
-//     // idImage:Joi.string().required()
-// })
-
-
 const {
   name, 
   email, 
@@ -75,14 +62,7 @@ if (!name || !email || !password) {
   throw new Error("please add all fields");
 }
 
-
  
-// const {error , value } = schema.validate(req?.body);
-
-// if(error) {
-//  res.status(401);
-//  throw new Error('Missing parameters')
-// }
   // check if userExists
   const userExists = await User.findOne({ email });
 
@@ -108,7 +88,7 @@ if(passwordCheck === false) {
     name,
     email,
     password: hashedPassword,
-    verified: false,
+    isVerified: false,
   });
 
   if (user) {
@@ -246,35 +226,49 @@ const getVerifyPin = (req, res) => {
 };
 
 // TODO:UpdatePassword
-const updatePassword = asyncHandler(async (req, res) => {
-  const { email, password } = req.body;
+const updatePassword = asyncHandler(async (req, res ,next) => {
+  const { email, password , _id} = req.body;
   // const {email,password } = req.
 
   const userExists = await User.findOne({ email });
   if (!userExists) {
-    throw new Error("User does not exist");
+    console.log('user does not exist')
+    throw new Error("oops cannot reset password for user that does not exist");
   }
-  if (userExists && (await bcrypt.compare(password, userExists.password))) {
-    throw new Error("this password already exists in database");
-  }
-
   const salt = await bcrypt.genSalt(10);
   const hashedPassword = await bcrypt.hash(password, salt);
+  // const updated = await User.updateOne({password: hashedPassword})
+  // if(!updated){
+  //   throw new Error('failed to update password')
+  // }
+
+  //  res.send(userExists)
+   User.updateOne({ password: hashedPassword}).then((response)=>{
+  res.json('successfully updated' + response)
+   }).catch((error) => {
+    console.log(error)
+    throw new Error('failed to updatePassword')
+   })  
+
+  // if (userExists && (await bcrypt.compare(password, userExists.password))) {
+  //   throw new Error("this password already exists in database");
+  // }
+
   // res.send(hashedPassword)
-  const updatedPassword = await User.findOneAndUpdate({
-    password: hashedPassword,
-  });
-  if (!updatedPassword) {
-    throw new Error('failed');
-  }
-  res.send(userExists);
+  // const updatedPassword = await User.replaceOne({
+  //   password: hashedPassword,
+  // });
+  // if (!updatedPassword) {
+  //   throw new Error('failed');
+  // }
+  // res.send(userExists);
   //  else {
   //   res.send(userExists);
   // }
   // res.send('failed')
 });
 //   module.export = {generateToken}
-
+// zhodbod88@gmail.com
 const verificationEmail = async ({ _id, email }, res) => {
   const currentUrl = "http://localhost:4000/";
 

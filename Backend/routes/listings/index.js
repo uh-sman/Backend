@@ -8,14 +8,14 @@ const{
     updateListing,
     getListing
     } = require('../../controllers/listingController');
-const { protect } = require('../../middleware');
+const { protect ,admin} = require('../../middleware');
 
-router.post('/create-listing',createListing)
-router.get('/get-listing',getListing)
+router.route('/').post(admin,createListing).get(admin,getListing)
+// router.get('/get-listing', getListing)
 // router.route('/create-listing/').post(protect,createListing).get(protect,getListing)
 // router.put('/add', loginUser)
 // router.route('/:id').delete()
 router.delete('/:id',deleteListing)
 // router.get('/get-listings', profile)
-
+  
 module.exports = router

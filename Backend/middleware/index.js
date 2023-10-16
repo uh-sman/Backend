@@ -32,12 +32,17 @@ const protect = asyncHandler(async (req, res, next) => {
   }
 });
 
-const admin = (req,res,next) => {
-if(req.user && req.user.isAdmin){
-  next()
-}else{
+const admin = async (req,res,next) => {
+  const {email} = req.body
+  const userExists = await User.findOne({ email })
+  // res.send(userExists)
+  if(userExists.isVerified === true){
+    // res.send('true')
+    next()
+  }
+else{
   res.status(401)
-  throw new Error ('Not authorized as an admin')
+  throw new Error('not authorized as an admin')
 }
 }
 

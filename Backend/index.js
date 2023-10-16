@@ -29,7 +29,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
 app.use("/api/users", userRoutes);
-app.use("/listing", listingRoutes);
+app.use("/api/listing", listingRoutes);
 // app.use("/listing", require("./routes/listings/index"));
 
 const _dirname = path.resolve();
