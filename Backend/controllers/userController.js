@@ -5,11 +5,19 @@ const User = require("../models/userModel");
 const Profile = require("../models/profileModels");
 const userVerification = require("../models/userVerification/userverification");
 const nodemailer = require("nodemailer");
+const crypto = require("crypto")
 const transporter = require("../email/index");
 const { v4: uuidv4 } = require("uuid");
+const {register,deleteUser} = require('./users/index')
+const {
+resetPassword,
+requestPasswordReset
+} = require('./passwordReset/index')
+const bcryptSalt = process.env.BCRYPT_SALT;
 const Joi = require("joi");
 const url = require('url')
-const token = Math.floor(100000 + Math.random() * 100000 + 1);
+// const token = Math.floor(100000 + Math.random() * 100000 + 1);
+const Token = require('../models/token/token')
 function fullUrl(req){
   return url.format({
     host: req.get('host')
@@ -50,72 +58,22 @@ const authUser = asyncHandler(async (req, res) => {
 });
 // TODO: REGISTER
 const registerUser = asyncHandler(async (req, res, next) => {
-const {
-  name, 
-  email, 
-  password,
-  confirmPassword
-} = req.body
-
-if (!name || !email || !password) {
-  res.status(400);
-  throw new Error("please add all fields");
-}
-
- 
-  // check if userExists
-  const userExists = await User.findOne({ email });
-
-  if (userExists) {
-    res.status(400);
-    throw new Error("User already exists");
-  }
-
-  let passwordCheck =  password === confirmPassword
-if(passwordCheck === false) {
- res.status(400).json({
-    // status: res.status(401),
-    message:"oops passwords don`t match"
-  })
-}
-  // HASH PASSWORD
-
-  const salt = await bcrypt.genSalt(10);
-  const hashedPassword = await bcrypt.hash(password, salt);
-
-  // CREATE USER
-  const user = await User.create({
-    name,
-    email,
-    password: hashedPassword,
-    isVerified: false,
-  });
-
-  if (user) {
-    res.status(201).json({
-      _id: user.id,
-      name: user.name,
-      email: user.email,
-      token: generateToken(user._id),
-    });
-  } else {
-    res.status(400);
-    throw new Error("Invalid credentials");
-  }
+const registerService = await register(req.body)
+ return res.json(registerService)
   // next();
   // sendOTP()
 
   // res.send(req.body)
 });
 
-// TODO:LOGIN
+// TODO:LOGINpassword
 const loginUser = asyncHandler(async (req, res) => {
   const { email, password, otp } = req.body;
   const user = await User.findOne({ email });
-  if (user && (await bcrypt.compare(password, user.password))) {
+  if (user && (await user.matchPassword(password))) {
     res.json({
       message:"LOGIN SUCCESSFUL",
-      _id: user.id,
+      _id: user._id,
       name: user.name,
       email: user.email,
       token: generateToken(user._id),
@@ -125,6 +83,11 @@ const loginUser = asyncHandler(async (req, res) => {
     throw new Error("Invalid credentials");
   }
 });
+
+const deleteUserController = asyncHandler(async (req,res) => {
+  const deleteUserRegister = await deleteUser(req.params,req.body)
+  return deleteUserRegister;
+})
 // TODO:PROFILE
 const profile = asyncHandler(async (req, res) => {
   const { Firstname, Lastname, Dob, phoneNo } = req.body;
@@ -171,58 +134,35 @@ const verify = asyncHandler(async (req, res) => {
   await Profile.findOneAndUpdate({ isVerified: true });
   //  Profile.save()
   res.send(phoneInDatabase);
-  // if (verified) {
-  //   res.send(phoneInDatabase)
-  //   // throw new Error({message:"failed to verify phoneNo"})
-  //   // console.log("failed to verify phoneNo");
-  //   // return null;
-  // }
-  // if(!verified){
-  //   throw new Error('failed')
-  // }
-
-  //  await Profile.updateOne({ isVerified: true },function(err,success){
-  //   if(err){
-  //     throw new Error({message:"failed to verify"})
-  //   }
-  //   if(success){
-  //     res.send(phoneInDatabase)
-  //   }
-  //  });
-  // if (!verified) {
-  //   throw new Error({message:"failed to verify phoneNo"})
-  //   // console.log("failed to verify phoneNo");
-  //   // return null;
-  // }
-  // res.send(phoneInDatabase);
 });
 // TODO:VERIFY PIN
 const getVerifyPin = (req, res) => {
-  let {userId, uniqueString} = req.params
- UserActivation.find({userId}).then((result) => {
-  if (result.length >  0) {
-    const {expiresAt} = result[0]
-    if (expiresAt < Date.now()) {
-      console.log('link has expired')
-      userVerification.deleteOne({userId}).then((res) => {}).catch((err) => {
-        console.log(err)
-      })
-    }
-  }else{
-    let message = 'An error occurred while verifying'
-    res.redirect(`/verify/verified/errors=true&message=${message}`)
-  }
- }).catch((error) => {
-  console.log(error);
-  let message = 'An error occurred while verifying'
-  res.redirect(`/verify/verified/errors=true&message=${message}`)
- })
-  // if(!findUserVerification){
-  //   throw new Error;
-  //   let
-  // } 
-  // console.log(token);
-  // res.send({ otp: token });
+//   let {userId, uniqueString} = req.params
+//  UserActivation.find({userId}).then((result) => {
+//   if (result.length >  0) {
+//     const {expiresAt} = result[0]
+//     if (expiresAt < Date.now()) {
+//       console.log('link has expired')
+//       userVerification.deleteOne({userId}).then((res) => {}).catch((err) => {
+//         console.log(err)
+//       })
+//     }
+//   }else{
+//     let message = 'An error occurred while verifying'
+//     res.redirect(`/verify/verified/errors=true&message=${message}`)
+//   }
+//  }).catch((error) => {
+//   console.log(error);
+//   let message = 'An error occurred while verifying'
+//   res.redirect(`/verify/verified/errors=true&message=${message}`)
+//  })
+//   // if(!findUserVerification){
+//   //   throw new Error;
+//   //   let
+//   // } 
+//   // console.log(token);
+//   // res.send({ otp: token });
+res.send('getVerifyPin')
 };
 
 // TODO:UpdatePassword
@@ -243,30 +183,51 @@ const updatePassword = asyncHandler(async (req, res ,next) => {
   // }
 
   //  res.send(userExists)
-   User.updateOne({ password: hashedPassword}).then((response)=>{
-  res.json('successfully updated' + response)
-   }).catch((error) => {
-    console.log(error)
-    throw new Error('failed to updatePassword')
-   })  
+  User.deleteOne({password}).then((success,error) => {
+    if(error){
+      res.json('failed to update')
+    }
+    if(success){
+      User.updateOne({ password: hashedPassword}).then((response)=>{
+        res.json('successfully updated' + response)
+         }).catch((error) => {
+          console.log(error)
+          throw new Error('failed to updatePassword')
+         })  
+    }
+  }).catch((error) => {
 
-  // if (userExists && (await bcrypt.compare(password, userExists.password))) {
-  //   throw new Error("this password already exists in database");
-  // }
+    throw new Error('failed' + error)
+  })
 
-  // res.send(hashedPassword)
-  // const updatedPassword = await User.replaceOne({
-  //   password: hashedPassword,
-  // });
-  // if (!updatedPassword) {
-  //   throw new Error('failed');
-  // }
-  // res.send(userExists);
-  //  else {
-  //   res.send(userExists);
-  // }
-  // res.send('failed')
 });
+
+const resetPasswordRequestController = asyncHandler(async (req,res,next) => {
+  const requestPasswordResetService = await requestPasswordReset(
+    req.body.email
+    )
+ return res.json(requestPasswordResetService)
+})
+
+const resetPasswordController = asyncHandler(async (req,res,next) => {
+  console.log("request coming in", req.query)
+  try {
+    
+    const resetPasswordService = await resetPassword(
+      req.query.id,
+      req.query.token,
+      req.query.password,
+      )
+      // return (resetPasswordService);
+      res.send('password reset successful')
+      // return res.json({message: 'successful reset'})
+    } catch (error) {
+      throw new Error(error)
+    }
+})
+// const reset = await Use
+
+
 //   module.export = {generateToken}
 // zhodbod88@gmail.com
 const verificationEmail = async ({ _id, email }, res) => {
@@ -286,7 +247,7 @@ const verificationEmail = async ({ _id, email }, res) => {
     expires: 300,
     // otp:`Your OTP is `
   };
-
+  
   const salt = await bcrypt.genSalt(10);
   const hashedUniqueString = await bcrypt.hash(uniqueString, salt);
   if (!hashedUniqueString) {
@@ -319,6 +280,9 @@ module.exports = {
   verify,
   getVerifyPin,
   updatePassword,
+  resetPasswordRequestController,
+  resetPasswordController,
+  deleteUserController
   // OtpRouter
 };
 

@@ -10,7 +10,10 @@ const {
     getProfile,
     verify,
     getVerifyPin,
-    updatePassword  
+    updatePassword,
+    resetPasswordRequestController,
+    resetPasswordController,
+    deleteUserController  
     // OtpRouter
 } = require('../controllers/userController')
 const {sendOTP,OtpRouter} = require('../controllers/otpController')
@@ -18,7 +21,9 @@ const {sendOTP,OtpRouter} = require('../controllers/otpController')
 router.route('/register').post(registerUser)
 router.post('/login',  loginUser)
 // update password route
-router.route('/forgot-password').post(updatePassword)
+router.route('/forgot-password-request').post(resetPasswordRequestController)
+router.route('/forgot-password-reset').post(resetPasswordController)
+router.route('/:id').delete(deleteUserController)
 // router.route('/register').post(registerUser).post(sendOTP)
 // router.post('/profile',  profile)
 router.route('/profile').post(profile).get(getProfile)
