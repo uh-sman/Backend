@@ -64,8 +64,8 @@ const superAdminLogin = async (data) => {
   // })
 };
 const tokenRequest = async (data) => {
-    let production;
-    const BASE_URL = production ? process.env.NODE_ENV : 'http://localhost:4000'
+    let production = "https://dcanestate.onrender.com"
+    const BASE_URL = production ? production : 'http://localhost:4000'
   //   let token;
   //   token = id;
   const { email } = data;

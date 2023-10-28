@@ -9,8 +9,8 @@ const transporter = require("../../email/index");
 
 const requestPasswordReset = async (email) => {
   // const {email,password} = req.
-  let production;
-  const BASE_URL = production ? process.env.NODE_ENV : 'http://localhost:4000'
+  let production = "https://dcanestate.onrender.com"
+  const BASE_URL = production ? production: 'http://localhost:4000'
   const user = await User.findOne({ email });
   if (!user) throw new Error("oops user does not exist");
 
