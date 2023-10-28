@@ -9,6 +9,8 @@ const transporter = require("../../email/index");
 
 const requestPasswordReset = async (email) => {
   // const {email,password} = req.
+  let production;
+  const BASE_URL = production ? process.env.NODE_ENV : 'http://localhost:4000'
   const user = await User.findOne({ email });
   if (!user) throw new Error("oops user does not exist");
 
@@ -28,7 +30,7 @@ const requestPasswordReset = async (email) => {
     token: hash,
     createdAt: Date.now(),
   }).save();
-  const link = `http://localhost:4000/api/users/forgot-password-reset?token=${resetToken}&id=${user._id}`;
+  const link = `${BASE_URL}/api/users/forgot-password-reset?token=${resetToken}&id=${user._id}`;
   // sendEmail(user.email,'You requested to reset passwords',{name:user.name,link: link}, "./template/api/users/forgot-password-request.handlebars")
   // return link;
   const mailOptions = {
@@ -54,21 +56,14 @@ const requestPasswordReset = async (email) => {
 };
 
 const resetPassword = async (userId, token, password) => {
-  // const {userId,token,password} = req.body
-  console.log("userid", userId)
-  console.log("token", token)
-  console.log("password", password)
   let passwordResetToken = await Token.findOne({ userId });
 
-  console.log("passwordResetToken", passwordResetToken)
   if (!passwordResetToken) {
     throw new Error("Invalid or expired password reset token");
   }
 
   const isValid = await bcrypt.compare(token, passwordResetToken.token);
-
   if (!isValid) {
-    // console.log("failed");
     throw new Error("Invalid or expired password reset token");
   }
 
@@ -93,7 +88,7 @@ const resetPassword = async (userId, token, password) => {
     subject: "Password Reset Successfully",
     // html: `<p>${text}</p>`,
     text: `Hi ${user.name}`,
-    html: `<p>Tour password has been changed successfully</p>`,
+    html: `<p>Your password has been changed successfully</p>`,
     // html: `<a href = "${link}">reset password</a>`,
     // text,
     expires: 300,
@@ -106,14 +101,7 @@ const resetPassword = async (userId, token, password) => {
       console.log("successful" + info.response);
     }
   });
-  //   sendEmail(
-  //     user.email,
-  //     "Password Reset successful",
-  //     {
-  //       name: user.name,
-  //     },
-  //     "/template/api/users/forgot-password-reset.handlebars"
-  //   );
+ 
   await passwordResetToken.deleteOne();
   return {
     message: "Password reset successfully",
@@ -126,3 +114,11 @@ module.exports = {
   resetPassword,
   requestPasswordReset,
 };
+ //   sendEmail(
+  //     user.email,
+  //     "Password Reset successful",
+  //     {
+  //       name: user.name,
+  //     },
+  //     "/template/api/users/forgot-password-reset.handlebars"
+  //   );

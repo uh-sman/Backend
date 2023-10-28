@@ -9,7 +9,9 @@ const userRoutes = require('./routes/userRoutes')
 const {errorHandler,notFound} = require('./middleware/errorMiddleware')
 const listingRoutes = require('./routes/listings/index')
 // const errorPage = require('./middleware/errorMiddleware')
+const superAdmin = require('./routes/superAdmin')
 const connectDB = require("./config/db");
+// const superAdmin = require()
 const cors = require('cors')
 const app = express();
 connectDB();
@@ -29,6 +31,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
 app.use("/api/users", userRoutes);
+app.use("/api/superAdmin", superAdmin);
 app.use("/api/listing", listingRoutes);
 // app.use("/listing", require("./routes/listings/index"));
 

@@ -8,7 +8,11 @@ const nodemailer = require("nodemailer");
 const crypto = require("crypto")
 const transporter = require("../email/index");
 const { v4: uuidv4 } = require("uuid");
-const {register,deleteUser} = require('./users/index')
+const {
+  register,
+  deleteUser,
+  login
+} = require('./users/index')
 const {
 resetPassword,
 requestPasswordReset
@@ -57,7 +61,7 @@ const authUser = asyncHandler(async (req, res) => {
   }
 });
 // TODO: REGISTER
-const registerUser = asyncHandler(async (req, res, next) => {
+const registerUser = asyncHandler( async (req, res, next) => {
 const registerService = await register(req.body)
  return res.json(registerService)
   // next();
@@ -67,22 +71,27 @@ const registerService = await register(req.body)
 });
 
 // TODO:LOGINpassword
-const loginUser = asyncHandler(async (req, res) => {
-  const { email, password, otp } = req.body;
-  const user = await User.findOne({ email });
-  if (user && (await user.matchPassword(password))) {
-    res.json({
-      message:"LOGIN SUCCESSFUL",
-      _id: user._id,
-      name: user.name,
-      email: user.email,
-      token: generateToken(user._id),
-    });
-  } else {
-    res.status(400);
-    throw new Error("Invalid credentials");
-  }
-});
+// const loginUser = asyncHandler(async (req, res) => {
+//   const { email, password, otp } = req.body;
+//   const user = await User.findOne({ email });
+//   if (user && (await user.matchPassword(password))) {
+//     res.json({
+//       message:"LOGIN SUCCESSFUL",
+//       _id: user._id,
+//       name: user.name,
+//       email: user.email,
+//       token: generateToken(user._id),
+//     });
+//   } else {
+//     res.status(400);
+//     throw new Error("Invalid credentials");
+//   }
+// });
+
+const loginUser = asyncHandler( async (req, res, next) => {
+  const loginService = await login(req.body)
+  return res.json(loginService)
+})
 
 const deleteUserController = asyncHandler(async (req,res) => {
   const deleteUserRegister = await deleteUser(req.params,req.body)
@@ -90,8 +99,8 @@ const deleteUserController = asyncHandler(async (req,res) => {
 })
 // TODO:PROFILE
 const profile = asyncHandler(async (req, res) => {
-  const { Firstname, Lastname, Dob, phoneNo } = req.body;
-  if (!(Firstname && Lastname && Dob && phoneNo)) {
+  const { Firstname, Lastname, Dob, phoneNo, address } = req.body;
+  if (!(Firstname && Lastname && Dob && phoneNo && address )) {
     res.status(500);
     throw new Error("all fields are required");
   }
@@ -137,31 +146,31 @@ const verify = asyncHandler(async (req, res) => {
 });
 // TODO:VERIFY PIN
 const getVerifyPin = (req, res) => {
-//   let {userId, uniqueString} = req.params
-//  UserActivation.find({userId}).then((result) => {
-//   if (result.length >  0) {
-//     const {expiresAt} = result[0]
-//     if (expiresAt < Date.now()) {
-//       console.log('link has expired')
-//       userVerification.deleteOne({userId}).then((res) => {}).catch((err) => {
-//         console.log(err)
-//       })
-//     }
-//   }else{
-//     let message = 'An error occurred while verifying'
-//     res.redirect(`/verify/verified/errors=true&message=${message}`)
-//   }
-//  }).catch((error) => {
-//   console.log(error);
-//   let message = 'An error occurred while verifying'
-//   res.redirect(`/verify/verified/errors=true&message=${message}`)
-//  })
-//   // if(!findUserVerification){
-//   //   throw new Error;
-//   //   let
-//   // } 
-//   // console.log(token);
-//   // res.send({ otp: token });
+  let {userId, uniqueString} = req.params
+ UserActivation.find({userId}).then((result) => {
+  if (result.length >  0) {
+    const {expiresAt} = result[0]
+    if (expiresAt < Date.now()) {
+      console.log('link has expired')
+      userVerification.deleteOne({userId}).then((res) => {}).catch((err) => {
+        console.log(err)
+      })
+    }
+  }else{
+    let message = 'An error occurred while verifying'
+    res.redirect(`/verify/verified/errors=true&message=${message}`)
+  }
+ }).catch((error) => {
+  console.log(error);
+  let message = 'An error occurred while verifying'
+  res.redirect(`/verify/verified/errors=true&message=${message}`)
+ })
+  // if(!findUserVerification){
+  //   throw new Error;
+  //   let
+  // } 
+  // console.log(token);
+  // res.send({ otp: token });
 res.send('getVerifyPin')
 };
 
@@ -210,7 +219,6 @@ const resetPasswordRequestController = asyncHandler(async (req,res,next) => {
 })
 
 const resetPasswordController = asyncHandler(async (req,res,next) => {
-  console.log("request coming in", req.query)
   try {
     
     const resetPasswordService = await resetPassword(
@@ -218,8 +226,8 @@ const resetPasswordController = asyncHandler(async (req,res,next) => {
       req.query.token,
       req.query.password,
       )
-      // return (resetPasswordService);
-      res.send('password reset successful')
+      return res.json(resetPasswordService);
+      // res.send('password reset successful')
       // return res.json({message: 'successful reset'})
     } catch (error) {
       throw new Error(error)
@@ -271,6 +279,9 @@ const verificationEmail = async ({ _id, email }, res) => {
     }
   });
 };
+
+// const changeRole = asyncHandler( async (req,res,next) => {
+// })
 
 module.exports = {
   registerUser,

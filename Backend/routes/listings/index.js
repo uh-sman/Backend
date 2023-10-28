@@ -8,9 +8,9 @@ const{
     updateListing,
     getListing
     } = require('../../controllers/listingController');
-const { protect ,admin} = require('../../middleware');
+const { protect ,admin, superAdmin} = require('../../middleware/index');
 
-router.route('/').post(admin,createListing).get(admin,getListing)
+router.route('/').post(superAdmin ,createListing)
 // router.get('/get-listing', getListing)
 // router.route('/create-listing/').post(protect,createListing).get(protect,getListing)
 // router.put('/add', loginUser)

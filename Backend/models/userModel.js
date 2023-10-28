@@ -26,45 +26,40 @@ const bcrypt = require("bcryptjs");
 
 const userSchema = new Schema(
   {
+    userId:{
+      type:mongoose.Schema.Types.ObjectId,
+      required: false,
+      unique: [true,'userId must be unique']
+    },
     name: {
       type: String,
       trim: true,
-      required: true,
+      required: [true, 'please enter a username'],
       unique: true,
     },
     email: {
       type: String,
       trim: true,
       unique: true,
-      required: true,
+      required: [true, 'please enter your email'],
     },
     password: {
       type: String,
+      required:[true,'please enter your password']
     },
-    userRoles: [
-      {
-        user: {
-          // _id: mongoose.Schema.Types.ObjectId,
-          type: Number,
-          default: 2001,
-        },
-        superAdmin: {
-          type: Number,
-          default:Boolean,
-          limit: 1
-        },
-        Admin: {
-          accountAdmin: {
-            type: String,
-            default: Boolean,
-          } ,
-           listingsAdmin: {
-            type: String,
-            default: Boolean,
-          },
-        },
-      },
-    ],
+    // role:{
+    //   type:String,
+    //   required:[true, 'role is required to access certain features'],
+    //   default:'user'
+    // }
+    role:{
+      // type:mongoose.Schema.Types.ObjectId,
+      type:String,
+      ref:'role',
+      enum :['superAdmin', 'admin', 'user'],
+       default: 'user' ,
+       required:[true ,'role required']
+    }
   },
   {
     timestamps: true,
@@ -96,3 +91,36 @@ module.exports = mongoose.model("user", userSchema);
  
  
 // },
+
+// userRoles: [
+//   {
+//     user: {
+//       // _id: mongoose.Schema.Types.ObjectId,
+//       type: Number,
+//       default: 2001,
+//     },
+//     superAdmin: {
+//       type: Number,
+//       default:Boolean,
+//       limit: 1
+//     },
+//     Admin: {
+//       accountAdmin: {
+//         type: String,
+//         default: Boolean,
+//       } ,
+//        listingsAdmin: {
+//         type: String,
+//         default: Boolean,
+//       },
+//     },
+//   },
+// ],
+
+
+// roles:[
+//   {
+//     type: mongoose.Schema.ObjectId,
+//     ref:"Role"
+//   }
+// ]

@@ -1,7 +1,7 @@
 const jwt = require("jsonwebtoken");
 const asyncHandler = require("express-async-handler");
 const User = require("../models/userModel");
-
+const SuperAdmin = require('../models/admin/adminModel')
 const protect = asyncHandler(async (req, res, next) => {
   let token;
 
@@ -32,20 +32,7 @@ const protect = asyncHandler(async (req, res, next) => {
   }
 });
 
-const admin = async (req,res,next) => {
-  // const {email} = req.body
-  // const {email} = req.body
-  // const userExists = await User.findOne({ email })
-  // res.send(userExists)
-//   if(userExists.isVerified === true){
-//     // res.send('true')
-//     next()
-//   }
-// else{
-//   res.status(401)
-//   throw new Error('not authorized as an admin')
-// }
-
+const admin = asyncHandler(async (req,res,next) => {
 if(req.user && req.user.isAdmin){
   next()
 }
@@ -53,7 +40,32 @@ else{
   res.status(401);
   throw new Error('Not authorized ')
 }
-}
+})
+// async function superAdmin  (userRole) {
+//   return (req, res, next) => {
+//     // const user = req.role;
+//     const {role} = req.body.role
+//     const userRole = await User.findOne()
 
-module.exports = { protect, admin }
+//     if(user && user.role === userRole){
+//       next()
+//     }else{
+//       res.status(403).send('Access denied not authorized')
+//     }
+//   }
+// }
+
+const superAdmin = asyncHandler ( async (req, res, next) => {
+  const userRoles = await User.findOne({email : req.body.email, role: 'superAdmin'})
+  let userRole = 'superAdmin'
+  const user = req.body
+  if(userRoles && userRoles.role === userRole){
+    next()
+  }
+  else{
+    res.status(403).send('Access denied not authorized')
+  }
+})
+
+module.exports = { protect, admin , superAdmin}
 
