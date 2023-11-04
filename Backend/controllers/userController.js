@@ -3,7 +3,7 @@ const bcrypt = require("bcryptjs");
 const asyncHandler = require("express-async-handler");
 const User = require("../models/userModel");
 const Profile = require("../models/profileModels");
-const userVerification = require("../models/userVerification/userverification");
+// const userVerification = require("../models/userVerification/userverification");
 const nodemailer = require("nodemailer");
 const crypto = require("crypto")
 const transporter = require("../email/index");
@@ -21,7 +21,7 @@ const bcryptSalt = process.env.BCRYPT_SALT;
 const Joi = require("joi");
 const url = require('url')
 // const token = Math.floor(100000 + Math.random() * 100000 + 1);
-const Token = require('../models/token/token')
+// const Token = require('../models/token/token')
 function fullUrl(req){
   return url.format({
     host: req.get('host')
@@ -93,9 +93,19 @@ const loginUser = asyncHandler( async (req, res, next) => {
   return res.json(loginService)
 })
 
-const deleteUserController = asyncHandler(async (req,res) => {
-  const deleteUserRegister = await deleteUser(req.params,req.body)
-  return deleteUserRegister;
+const deleteUserController = asyncHandler( async (req,res) => {
+  try{
+    // console.log('request from params',req.query.userId)
+    const deleteUserRegister = await deleteUser(req.query.userId)
+    // let userId = req.query.userId
+  //  const user = await User.findByIdAndDelete(userId)
+  //  if(!user) throw new Error('user not found')
+  //  res.json('Account has been successfully deleted')
+    return res.json(deleteUserRegister);
+
+  }catch(error){
+    res.status(500).json({message: 'Error deleting user', error: error.message})
+  }
 })
 // TODO:PROFILE
 const profile = asyncHandler(async (req, res) => {
@@ -145,71 +155,70 @@ const verify = asyncHandler(async (req, res) => {
   res.send(phoneInDatabase);
 });
 // TODO:VERIFY PIN
-const getVerifyPin = (req, res) => {
-  let {userId, uniqueString} = req.params
- UserActivation.find({userId}).then((result) => {
-  if (result.length >  0) {
-    const {expiresAt} = result[0]
-    if (expiresAt < Date.now()) {
-      console.log('link has expired')
-      userVerification.deleteOne({userId}).then((res) => {}).catch((err) => {
-        console.log(err)
-      })
-    }
-  }else{
-    let message = 'An error occurred while verifying'
-    res.redirect(`/verify/verified/errors=true&message=${message}`)
-  }
- }).catch((error) => {
-  console.log(error);
-  let message = 'An error occurred while verifying'
-  res.redirect(`/verify/verified/errors=true&message=${message}`)
- })
-  // if(!findUserVerification){
-  //   throw new Error;
-  //   let
-  // } 
-  // console.log(token);
-  // res.send({ otp: token });
-res.send('getVerifyPin')
-};
+// const getVerifyPin = (req, res) => {
+//   let {userId, uniqueString} = req.params
+//  UserActivation.find({userId}).then((result) => {
+//   if (result.length >  0) {
+//     const {expiresAt} = result[0]
+//     if (expiresAt < Date.now()) {
+//       console.log('link has expired')
+//       userVerification.deleteOne({userId}).then((res) => {}).catch((err) => {
+//         console.log(err)
+//       })
+//     }
+//   }else{
+//     let message = 'An error occurred while verifying'
+//     res.redirect(`/verify/verified/errors=true&message=${message}`)
+//   }
+//  }).catch((error) => {
+//   console.log(error);
+//   let message = 'An error occurred while verifying'
+//   res.redirect(`/verify/verified/errors=true&message=${message}`)
+//  })
+//   // if(!findUserVerification){
+//   //   throw new Error;
+//   //   let
+//   // } 
+//   // console.log(token);
+//   // res.send({ otp: token });
+// res.send('getVerifyPin')
+// };
 
 // TODO:UpdatePassword
-const updatePassword = asyncHandler(async (req, res ,next) => {
-  const { email, password , _id} = req.body;
-  // const {email,password } = req.
+// const updatePassword = asyncHandler(async (req, res ,next) => {
+//   const { email, password , _id} = req.body;
+//   // const {email,password } = req.
+//   const userExists = await User.findOne({ email });
+//   if (!userExists) {
+//     console.log('user does not exist')
+//     throw new Error("oops cannot reset password for user that does not exist");
+//   }
+//   const salt = await bcrypt.genSalt(10);
+//   const hashedPassword = await bcrypt.hash(password, salt);
+//   // const updated = await User.updateOne({password: hashedPassword})
+//   // if(!updated){
+//   //   throw new Error('failed to update password')
+//   // }
 
-  const userExists = await User.findOne({ email });
-  if (!userExists) {
-    console.log('user does not exist')
-    throw new Error("oops cannot reset password for user that does not exist");
-  }
-  const salt = await bcrypt.genSalt(10);
-  const hashedPassword = await bcrypt.hash(password, salt);
-  // const updated = await User.updateOne({password: hashedPassword})
-  // if(!updated){
-  //   throw new Error('failed to update password')
-  // }
+//   //  res.send(userExists)
+//   User.deleteOne({password}).then((success,error) => {
+//     if(error){
+//       res.json('failed to update')
+//     }
+//     if(success){
+//       User.updateOne({ password: hashedPassword}).then((response)=>{
+//         res.json('successfully updated' + response)
+//          }).catch((error) => {
+//           console.log(error)
+//           throw new Error('failed to updatePassword')
+//          })  
+//     }
+//   }).catch((error) => {
 
-  //  res.send(userExists)
-  User.deleteOne({password}).then((success,error) => {
-    if(error){
-      res.json('failed to update')
-    }
-    if(success){
-      User.updateOne({ password: hashedPassword}).then((response)=>{
-        res.json('successfully updated' + response)
-         }).catch((error) => {
-          console.log(error)
-          throw new Error('failed to updatePassword')
-         })  
-    }
-  }).catch((error) => {
+//     throw new Error('failed' + error)
+//   })
 
-    throw new Error('failed' + error)
-  })
-
-});
+// });
 
 const resetPasswordRequestController = asyncHandler(async (req,res,next) => {
   const requestPasswordResetService = await requestPasswordReset(
@@ -238,47 +247,47 @@ const resetPasswordController = asyncHandler(async (req,res,next) => {
 
 //   module.export = {generateToken}
 // zhodbod88@gmail.com
-const verificationEmail = async ({ _id, email }, res) => {
-  const currentUrl = "http://localhost:4000/";
+// const verificationEmail = async ({ _id, email }, res) => {
+//   const currentUrl = "http://localhost:4000/";
 
-  const uniqueString = uuidv4() + _id;
-  const mailOptions = {
-    from: process.env.AUTH_EMAIL,
-    to,
-    subject,
-    // html: `<p>${text}</p>`,
-    html: `<p>Verify your email address to complete the signup into your account.</p> <p>Click <a href=${
-      currentUrl + "/verify" + _id + "/" + uniqueString
-    }>here</a> to verify</p>`,
-    // html: `<a href = '${url}'>${text}</a>`,
-    // text,
-    expires: 300,
-    // otp:`Your OTP is `
-  };
+//   const uniqueString = uuidv4() + _id;
+//   const mailOptions = {
+//     from: process.env.AUTH_EMAIL,
+//     to,
+//     subject,
+//     // html: `<p>${text}</p>`,
+//     html: `<p>Verify your email address to complete the signup into your account.</p> <p>Click <a href=${
+//       currentUrl + "/verify" + _id + "/" + uniqueString
+//     }>here</a> to verify</p>`,
+//     // html: `<a href = '${url}'>${text}</a>`,
+//     // text,
+//     expires: 300,
+//     // otp:`Your OTP is `
+//   };
   
-  const salt = await bcrypt.genSalt(10);
-  const hashedUniqueString = await bcrypt.hash(uniqueString, salt);
-  if (!hashedUniqueString) {
-    res.send("failed");
-  }
-  const newVerification = new userVerification({
-    userId: _id,
-    uniqueString: hashedUniqueString,
-    createdAt: Date.now(),
-    expiresAt: Date.now() + 300000,
-  });
-  newVerification.save();
-  if (!newVerification) {
-    res.send("failed");
-  }
-  transporter.sendMail(mailOptions, function (error, info) {
-    if (error) {
-      console.log("error" + error);
-    } else {
-      console.log("successful" + info.response);
-    }
-  });
-};
+//   const salt = await bcrypt.genSalt(10);
+//   const hashedUniqueString = await bcrypt.hash(uniqueString, salt);
+//   if (!hashedUniqueString) {
+//     res.send("failed");
+//   }
+//   const newVerification = new userVerification({
+//     userId: _id,
+//     uniqueString: hashedUniqueString,
+//     createdAt: Date.now(),
+//     expiresAt: Date.now() + 300000,
+//   });
+//   newVerification.save();
+//   if (!newVerification) {
+//     res.send("failed");
+//   }
+//   transporter.sendMail(mailOptions, function (error, info) {
+//     if (error) {
+//       console.log("error" + error);
+//     } else {
+//       console.log("successful" + info.response);
+//     }
+//   });
+// };
 
 // const changeRole = asyncHandler( async (req,res,next) => {
 // })
@@ -289,8 +298,8 @@ module.exports = {
   profile,
   getProfile,
   verify,
-  getVerifyPin,
-  updatePassword,
+  // getVerifyPin,
+  // updatePassword,
   resetPasswordRequestController,
   resetPasswordController,
   deleteUserController

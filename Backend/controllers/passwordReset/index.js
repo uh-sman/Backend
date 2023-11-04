@@ -30,7 +30,7 @@ const requestPasswordReset = async (email) => {
     token: hash,
     createdAt: Date.now(),
   }).save();
-  const link = `${BASE_URL}/api/users/forgot-password-reset?token=${resetToken}&id=${user._id}`;
+  const link = `http://localhost:4000/api/users/forgot-password-reset?token=${resetToken}&id=${user._id}`;
   // sendEmail(user.email,'You requested to reset passwords',{name:user.name,link: link}, "./template/api/users/forgot-password-request.handlebars")
   // return link;
   const mailOptions = {
@@ -44,13 +44,13 @@ const requestPasswordReset = async (email) => {
     expires: 300,
     // otp:`Your OTP is `
   };
-  transporter.sendMail(mailOptions, function (error, info) {
-    if (error) {
-      console.log("error" + error);
-    } else {
-      console.log("successful" + info.response);
-    }
-  });
+  // transporter.sendMail(mailOptions, function (error, info) {
+  //   if (error) {
+  //     console.log("error" + error);
+  //   } else {
+  //     console.log("successful" + info.response);
+  //   }
+  // });
   return link;
   // res.send(token)
 };
@@ -94,13 +94,13 @@ const resetPassword = async (userId, token, password) => {
     expires: 300,
     // otp:`Your OTP is `
   };
-  transporter.sendMail(mailOptions, function (error, info) {
-    if (error) {
-      console.log("error" + error);
-    } else {
-      console.log("successful" + info.response);
-    }
-  });
+  // transporter.sendMail(mailOptions, function (error, info) {
+  //   if (error) {
+  //     console.log("error" + error);
+  //   } else {
+  //     console.log("successful" + info.response);
+  //   }
+  // });
  
   await passwordResetToken.deleteOne();
   return {

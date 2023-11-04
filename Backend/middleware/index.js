@@ -41,19 +41,6 @@ else{
   throw new Error('Not authorized ')
 }
 })
-// async function superAdmin  (userRole) {
-//   return (req, res, next) => {
-//     // const user = req.role;
-//     const {role} = req.body.role
-//     const userRole = await User.findOne()
-
-//     if(user && user.role === userRole){
-//       next()
-//     }else{
-//       res.status(403).send('Access denied not authorized')
-//     }
-//   }
-// }
 
 const superAdmin = asyncHandler ( async (req, res, next) => {
   const userRoles = await User.findOne({email : req.body.email, role: 'superAdmin'})

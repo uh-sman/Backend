@@ -10,19 +10,29 @@ const JWT_SECRET = process.env.JWT_SECRET;
 const superAdminRegister = async (data) => {
   const { name, password, email, role } = data;
   let sRole = "superAdmin";
-  const adminExists = await SuperAdmin.findOne({ name, role: sRole });
+  // const adminExists = await SuperAdmin.findOne({ name }).$where({role:sRole}).gt(1)
+  const adminExists = await SuperAdmin.findOne({ role: {$gt: 1} })
+  // const userCount = await SuperAdmin.countDocuments({role: 'superAdmin'})
+//   const userCount = SuperAdmin.countDocuments({role: sRole})
   const salt = await bcrypt.genSalt(10);
   const hashedPassword = await bcrypt.hash(password, salt);
   const user = await User.findOne({ email, role: sRole });
-  if (adminExists && user && adminExists.role && user.role === sRole)
-    throw new Error("cannot create a new Admin");
-  const admin = await SuperAdmin.create({
-    email: email,
-    name: name,
-    password: hashedPassword,
-    // token:
+  if(adminExists) throw new Error ('cannot create new superAdmin only one SuperAdmin is allowed')
+//   if(adminExists && adminExists > 2) throw new Error('cannot create Admin')
+// if(adminExists.role === sRole){
+    // if(userCount > 1) throw new Error('cannot create Admin')
+// }else{
+//     throw new Error('failed')
+// }
+//   if(userCount && userCount > 2) throw new Error('limit reached. Cannot create new superAdmin')
+//   if (adminExists && user && adminExists.role && user.role === sRole)
+//     throw new Error("cannot create a new Admin");
+const admin = await SuperAdmin.create({
+  email: email,
+  name: name,
+  password: hashedPassword,
+  // token:
   });
-
   await User.create({
     userId: admin._id,
     email: email,
@@ -31,7 +41,6 @@ const superAdminRegister = async (data) => {
     role: sRole,
   });
   const token = JWT.sign({ id: admin._id }, JWT_SECRET);
-  //   const updateRole = await user.updateOne({ role: "superAdmin" });
   return (data = {
     message: "Admin created successfully",
     id: admin._id,
@@ -49,9 +58,6 @@ const superAdminLogin = async (data) => {
   if (!user) throw new Error("not authorized as an admin");
   const token = JWT.sign({ _id: user._id }, JWT_SECRET);
 
-  //  if(userExists) {
-  //     return(userExists)
-  //  }
   if (user && (await bcrypt.compare(password, user.password))) {
     return (data = {
       _id: user._id,
@@ -59,9 +65,6 @@ const superAdminLogin = async (data) => {
       token: token,
     });
   }
-  // return (data = {
-  //     name:"usman",
-  // })
 };
 const tokenRequest = async (data) => {
     let production = "https://dcanestate.onrender.com"
@@ -86,7 +89,7 @@ const tokenRequest = async (data) => {
     createdAt: Date.now(),
   }).save();
 
-  const link = `${BASE_URL}/api/superAdmin/confirmToken?token=${confirmToken}&id=${user._id}`;
+  const link = `http://localhost:4000/api/superAdmin/confirmToken?token=${confirmToken}&id=${user._id}`;
 
   // const {  } = data
   // const tokenCode =
@@ -115,11 +118,41 @@ const tokenConfirmation = async (token, userId, data) => {
     isVerified: user.isVerified,
   };
 };
+
+const deleteAdmin = async (data) => {
+  console.log(data)
+  const user = await User.findById(data)
+  // let role;
+//  const user = await User.findById(data)
+//  role = user.role
+//  if(!user) throw new Error({status: 404,message: 'User not found'})
+//  if(user.role === 'admin') await User.deleteOne({ role })
+//  else{
+return (data = {
+  message: 'User Successfully deleted',
+ user
+})
+// }
+}
+
+const getUserByAdmin = async (data) => {
+
+  const user = await User.find()
+  if(user) {
+    return (data = {
+      user
+    })
+  }else{
+    throw new Error('no user found')
+  }
+}
 module.exports = {
   superAdminRegister,
   superAdminLogin,
   tokenRequest,
   tokenConfirmation,
+  deleteAdmin,
+  getUserByAdmin
 };
 
 // try {

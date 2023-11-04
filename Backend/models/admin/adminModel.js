@@ -24,14 +24,14 @@ const superAdminSchema = new Schema ({
     },
     role:{
         type: String,
-        ref:"role",
+        ref:"user",
         default:'superAdmin'
     },
     isVerified:{
         type:Boolean,
         default:false
     },
-    maxLimit: Number,
+    max: Number,
 })
 
 module.exports = mongoose.model('superAdmin', superAdminSchema)

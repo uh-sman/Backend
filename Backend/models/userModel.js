@@ -26,11 +26,11 @@ const bcrypt = require("bcryptjs");
 
 const userSchema = new Schema(
   {
-    userId:{
-      type:mongoose.Schema.Types.ObjectId,
-      required: false,
-      unique: [true,'userId must be unique']
-    },
+    // userId:{
+    //   type:mongoose.Schema.Types.ObjectId,
+    //   required: false,
+    //   unique: [true,'userId must be unique']
+    // },
     name: {
       type: String,
       trim: true,
@@ -55,7 +55,7 @@ const userSchema = new Schema(
     role:{
       // type:mongoose.Schema.Types.ObjectId,
       type:String,
-      ref:'role',
+      // ref:'role',
       enum :['superAdmin', 'admin', 'user'],
        default: 'user' ,
        required:[true ,'role required']

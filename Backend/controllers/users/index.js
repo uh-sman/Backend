@@ -4,7 +4,8 @@ const JWTSecret = process.env.JWT_SECRET;
 const User = require("../../models/userModel");
 const transporter = require('../../email/index')
 const JWT = require('jsonwebtoken')
-const Role = require('../../models/roles/roles')
+const rateLimitMiddleWare = require('../../middleware/requestLimitMiddleware')
+// const Role = require('../../models/roles/roles')
 // const register = async () => {
 //   const { name, email, password, confirmPassword } = req.body;
 
@@ -56,32 +57,21 @@ const Role = require('../../models/roles/roles')
 
 
 const register = async (data) => {
-  // const {}
   const { password, confirmPassword, email, roleName, name } = data
-  // console.log('data' , password, confirmPassword, email, roleName, name )
-  // console.log('data' , data )
-    // let user = await User.findOne({email: data.email})
     let user = await User.findOne({ email })
     if(user){
-        throw new Error('User already exist',422)
+        throw new Error('User already exist')
     }
-    
     let passwordCheck = password === confirmPassword
 
     if(!passwordCheck){
       throw new Error('passwords don`t match')
     }
-    // const role = await Role.findOne({ name: roleName })
-    // if(!role) {
-    //   return {
-    //     message: 'Role not found'
-    //   }
-    // }
-    user = new User({name, email, password, role: roleName})
+     user = new User({name, email, password, role: roleName})
+     await user.save()
 
-    const token = JWT.sign({id: user._id}, JWTSecret)
+    const token = JWT.sign({ id: user._id }, JWTSecret)
 
-    await user.save()
 
     const mailOptions = {
         from: process.env.AUTH_EMAIL,
@@ -94,14 +84,15 @@ const register = async (data) => {
         expires:300,
         // otp:`Your OTP is `
       };
-      transporter.sendMail(mailOptions,function (error, info) {
-        if (error) {
-          console.log("error" + error);
-        } else {
-          console.log("successful" + info.response);
-        }
-      })
-
+      // transporter.sendMail(mailOptions,function (error, info) {
+      //   if (error) {
+      //     console.log("error" + error);
+      //   } else {
+      //     console.log("successful" + info.response);
+      //   }
+      // })
+      // rateLimitMiddleWare(user._id)
+      
     return(data = {
         userId: user._id,
         email:user.email,
@@ -110,24 +101,21 @@ const register = async (data) => {
     })
 }
 
-const deleteUser = async (email) => {
-  const { id } = req.params
-  const user = await User.findById({id}).select('-password')
+const deleteUser = async (data) => {
+  console.log('data', data)
+  const user = await User.findByIdAndDelete(data)
   if(!user) throw new Error('User not found');
-
-  await user.remove();
-  return ('You have successfully deleted your account')
+  return(data = {
+    message:"Successful"
+  })
 }
 
 const login = async (data) => {
    const { email, password } = data
-  //  console.log('email and password',data)
-
-  //  return (data)
    const user = await User.findOne({ email })
    const token = JWT.sign({_id: user._id}, JWTSecret)
    if(!user) throw new Error('user does not exist')
-
+    rateLimitMiddleWare(user._id)
    if(user && (await bcrypt.compare(password, user.password))){
     return (data = {
            message:"LOGIN SUCCESSFUL",
@@ -136,6 +124,9 @@ const login = async (data) => {
             email: user.email,
             token: token,
     })
+    
+   }else{
+    throw new Error('invalid credentials')
    }
 }
 

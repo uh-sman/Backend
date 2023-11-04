@@ -1,63 +1,63 @@
-const asyncHandler = require("express-async-handler");
-const OTP = require("../models/otp/index");
-const otpGenerator = require("otp-generator");
-const generateOTP = require("../utils/index");
-const transporter = require("../email/index");
-const User = require("../models/userModel");
-const express = require("express");
-const SMTPTransport = require("nodemailer/lib/smtp-transport");
-const dotenv = require("dotenv").config();
-const nodemailer = require("nodemailer");
-// const token =  Math.floor(100000 + Math.random() * 9000);
-const token = Math.floor(Math.random() * 100000 + 1);
-// const token = otpGenerator.generate(6, { upperCase: false, specialChars: false , alphabets: false});
-const OtpRouter = asyncHandler(async (req, res) => {
-  try {
-    res.send({
-      token,
-    });
-  } catch (error) {
-    res.send({ error });
-  }
-});
+// const asyncHandler = require("express-async-handler");
+// const OTP = require("../models/otp/index");
+// const otpGenerator = require("otp-generator");
+// const generateOTP = require("../utils/index");
+// const transporter = require("../email/index");
+// const User = require("../models/userModel");
+// const express = require("express");
+// const SMTPTransport = require("nodemailer/lib/smtp-transport");
+// const dotenv = require("dotenv").config();
+// const nodemailer = require("nodemailer");
+// // const token =  Math.floor(100000 + Math.random() * 9000);
+// const token = Math.floor(Math.random() * 100000 + 1);
+// // const token = otpGenerator.generate(6, { upperCase: false, specialChars: false , alphabets: false});
+// const OtpRouter = asyncHandler(async (req, res) => {
+//   try {
+//     res.send({
+//       token,
+//     });
+//   } catch (error) {
+//     res.send({ error });
+//   }
+// });
 
-const sendOTP = asyncHandler(async (req, res) => {
-  //   console.log("log request out",req)
-  const url = 'http://localhost:4000/verify/${verificationToken}'
-  const { from, to,subject,text} = req.body
-  const mailOptions = {
-    from: process.env.AUTH_EMAIL,
-     to,
-    subject,
-    // html: `<p>${text}</p>`,
-    html: `<a href = ''>${text}</a>`,
-    // text,
-    expires:300,
-    // otp:`Your OTP is `
-  };
-  // const data = {from,to,subject,text}
-  //   const { email, subject, message, duration = 0.1, createdAt, otp } = req.body;
-  const response = transporter.sendMail(mailOptions, function (error, info) {
-    if (error) {
-      console.log("error" + error);
-    } else {
-      console.log("successful" + info.response);
-    }
-  });
-  res.send("successful");
+// const sendOTP = asyncHandler(async (req, res) => {
+//   //   console.log("log request out",req)
+//   const url = 'http://localhost:4000/verify/${verificationToken}'
+//   const { from, to,subject,text} = req.body
+//   const mailOptions = {
+//     from: process.env.AUTH_EMAIL,
+//      to,
+//     subject,
+//     // html: `<p>${text}</p>`,
+//     html: `<a href = ''>${text}</a>`,
+//     // text,
+//     expires:300,
+//     // otp:`Your OTP is `
+//   };
+//   // const data = {from,to,subject,text}
+//   //   const { email, subject, message, duration = 0.1, createdAt, otp } = req.body;
+//   const response = transporter.sendMail(mailOptions, function (error, info) {
+//     if (error) {
+//       console.log("error" + error);
+//     } else {
+//       console.log("successful" + info.response);
+//     }
+//   });
+//   res.send("successful");
 
-//   res.send({response})
+// //   res.send({response})
 
-    // res.json(r)
-  //    await OTP.deleteOne({otp})
-});
+//     // res.json(r)
+//   //    await OTP.deleteOne({otp})
+// });
 
-// sendOTP()
+// // sendOTP()
 
-module.exports = {
-  OtpRouter,
-  sendOTP,
-};
+// module.exports = {
+//   OtpRouter,
+//   sendOTP,
+// };
 
 // // (email && subject && message)
 
