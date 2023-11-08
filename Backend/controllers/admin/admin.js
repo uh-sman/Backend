@@ -5,18 +5,30 @@ const {
     tokenRequest,
     tokenConfirmation,
     deleteAdmin,
-    getUserByAdmin
+    getUserByAdmin,
+    createAdmin,
+    updateAdmin
 } = require('./adminFunc/index')
 const Tokens = require('../users/token/index')
 const SuperAdminSignUpController = asyncHandler(async (req,res ,next) => {
-    const superAdminRegisterService = await superAdminRegister(req.body)
-    return res.json(superAdminRegisterService)
+    try{
+        const superAdminRegisterService = await superAdminRegister(req.body)
+        return res.json(superAdminRegisterService)
+    }catch(error) {
+        res.status(500)
+        throw new Error ('failed' + error.message)
+    }
 })
 
 
 const superAdminLoginController = asyncHandler (async (req,res,next) => {
-const superAdminLoginService = await superAdminLogin(req.body)
-return res.json(superAdminLoginService)
+    try{
+        const superAdminLoginService = await superAdminLogin(req)
+        return res.json(superAdminLoginService)
+    }catch(error){
+        res.status(500)
+        throw new Error(error)
+    }
 })
 
 
@@ -26,7 +38,6 @@ const tokenRequestController = asyncHandler( async (req,res,next) => {
 })
 
 const tokenConfirmationController = asyncHandler( async (req,res,next) => {
-    // console.log('incoming',req.query)
     const tokenService = await tokenConfirmation(req.query.token, req.query.id)
     return res.json(tokenService)
 })
@@ -38,10 +49,8 @@ const requestTokenController = asyncHandler ( async (req,res,next) => {
 
 const deleteAdminController = asyncHandler (async (req,res,next) => {
     try{
-        // console.log(req.query)
         const deleteAdminService = await deleteAdmin(req.query.userId)
         return res.json(deleteAdminService)
-        // res.send(req.query)
     }
     catch(error){
         return res.status(500).json({message: 'Error deleting user', error: error.message})
@@ -54,6 +63,20 @@ const getUserByAdminController = asyncHandler (async (req, res) => {
     const getUserByAdminRegister = await getUserByAdmin(req.body.roleName)
     return res.json(getUserByAdminRegister)
 })
+
+const createAdminController = asyncHandler ( async (req,res) => {
+    const createAdminService = await createAdmin(req.query.userId)
+    res.json(createAdminService)
+})
+
+const updateAdminController = asyncHandler ( async (req,res) => {
+    try{
+        const updateAdminService = await updateAdmin(req)
+        return res.json(updateAdminService)
+    }catch(error){
+        res.send(error)
+    }
+} )
 module.exports = {
     SuperAdminSignUpController,
     superAdminLoginController,
@@ -61,5 +84,7 @@ module.exports = {
     tokenConfirmationController,
     requestTokenController,
     deleteAdminController,
-    getUserByAdminController
+    getUserByAdminController,
+    createAdminController,
+    updateAdminController
 }

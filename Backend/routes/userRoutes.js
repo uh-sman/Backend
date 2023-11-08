@@ -18,7 +18,8 @@ const {
 } = require('../controllers/userController')
 // const {sendOTP,OtpRouter} = require('../controllers/otpController')
 router.route('/register').post(registerUser)
-router.post('/login',   loginUser)
+router.post('/login',loginUser)
+router.route('/user/:userId').get(getProfile)
 // update password route
 router.route('/forgot-password-request',).post(rateLimitMiddleWare,resetPasswordRequestController)
 router.route('/forgot-password-reset').post(resetPasswordController)

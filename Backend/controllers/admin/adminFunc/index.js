@@ -8,67 +8,76 @@ const crypto = require("crypto");
 const bcryptSalt = process.env.BCRYPT_SALT;
 const JWT_SECRET = process.env.JWT_SECRET;
 const superAdminRegister = async (data) => {
-  const { name, password, email, role } = data;
+  const { firstname, password, email, lastname, phoneNo ,role } = data;
   let sRole = "superAdmin";
-  // const adminExists = await SuperAdmin.findOne({ name }).$where({role:sRole}).gt(1)
-  const adminExists = await SuperAdmin.findOne({ role: {$gt: 1} })
-  // const userCount = await SuperAdmin.countDocuments({role: 'superAdmin'})
-//   const userCount = SuperAdmin.countDocuments({role: sRole})
-  const salt = await bcrypt.genSalt(10);
-  const hashedPassword = await bcrypt.hash(password, salt);
-  const user = await User.findOne({ email, role: sRole });
-  if(adminExists) throw new Error ('cannot create new superAdmin only one SuperAdmin is allowed')
-//   if(adminExists && adminExists > 2) throw new Error('cannot create Admin')
-// if(adminExists.role === sRole){
-    // if(userCount > 1) throw new Error('cannot create Admin')
-// }else{
-//     throw new Error('failed')
-// }
-//   if(userCount && userCount > 2) throw new Error('limit reached. Cannot create new superAdmin')
-//   if (adminExists && user && adminExists.role && user.role === sRole)
-//     throw new Error("cannot create a new Admin");
-const admin = await SuperAdmin.create({
-  email: email,
-  name: name,
-  password: hashedPassword,
-  // token:
-  });
-  await User.create({
-    userId: admin._id,
-    email: email,
-    name: name,
-    password: hashedPassword,
-    role: sRole,
-  });
-  const token = JWT.sign({ id: admin._id }, JWT_SECRET);
-  return (data = {
-    message: "Admin created successfully",
-    id: admin._id,
-    name: admin.name,
-    //   role:role,
-    token: token,
-    // updateRole,
-    //   token:token
-  });
+    const adminExists = await SuperAdmin.findOne({ role: { $gt: 3 } });
+
+
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
+    // const user = await User.findOne({ email, role: sRole });
+    if (adminExists)
+      throw new Error(
+        "cannot create new superAdmin only one SuperAdmin is allowed"
+      );
+
+    const admin = await SuperAdmin.create({
+      firstname,
+      lastname,
+      email,
+      phoneNo,
+      password:hashedPassword,
+      // token:
+    });
+    // await User.create({
+    //   userId: admin._id,
+    //   email: email,
+    //   name: name,
+    //   password: hashedPassword,
+    //   role: sRole,
+    // });
+    const token = JWT.sign({ id: admin._id }, JWT_SECRET);
+    return (data = {
+      message: "Admin created successfully",
+      id: admin._id,
+      firstname: admin.firstname,
+      lastname: admin.lastname,
+      email: admin.email,
+      phoneNo: admin.phoneNo,
+      role:admin.role,
+      token: token,
+    });
 };
 const superAdminLogin = async (data) => {
-  const { name, password, email } = data;
+  const {  password, email } = data.body
 
-  const user = await SuperAdmin.findOne({ name });
-  if (!user) throw new Error("not authorized as an admin");
-  const token = JWT.sign({ _id: user._id }, JWT_SECRET);
+  const user = await SuperAdmin.findOne({ email });
+  if (!user) throw new Error("admin does not exist");
 
-  if (user && (await bcrypt.compare(password, user.password))) {
+  let token = JWT.sign({ _id: user._id }, JWT_SECRET);
+  if (user && ( await bcrypt.compare(password, user.password))) {
     return (data = {
       _id: user._id,
-      name: user.name,
+      email: user.email,
       token: token,
     });
   }
+  // if (user && (await bcrypt.compare(password, user.password))) {
+  //   return (data = {
+  //     _id: user._id,
+  //     email: user.email,
+  //     token: token,
+  //   });
+  // }
+ 
+
+  // return (data = {
+  // user
+  // })
 };
 const tokenRequest = async (data) => {
-    let production = "https://dcanestate.onrender.com"
-    const BASE_URL = production ? production : 'http://localhost:4000'
+  let production = "https://dcanestate.onrender.com";
+  const BASE_URL = production ? production : "http://localhost:4000";
   //   let token;
   //   token = id;
   const { email } = data;
@@ -120,31 +129,55 @@ const tokenConfirmation = async (token, userId, data) => {
 };
 
 const deleteAdmin = async (data) => {
-  console.log(data)
-  const user = await User.findById(data)
-  // let role;
-//  const user = await User.findById(data)
-//  role = user.role
-//  if(!user) throw new Error({status: 404,message: 'User not found'})
-//  if(user.role === 'admin') await User.deleteOne({ role })
-//  else{
-return (data = {
-  message: 'User Successfully deleted',
- user
-})
-// }
-}
+  const user = await User.findById(data);
+
+  return (data = {
+    message: "User Successfully deleted",
+    user,
+  });
+};
 
 const getUserByAdmin = async (data) => {
-
-  const user = await User.find()
-  if(user) {
+  const user = await User.find();
+  if (user) {
     return (data = {
-      user
-    })
-  }else{
-    throw new Error('no user found')
+      user,
+    });
+  } else {
+    throw new Error("no user found");
   }
+};
+
+const createAdmin = async (data) => {
+  const user = await User.findById(data);
+  if (!user) throw new Error("user does not exist");
+  if (user.role === "admin")
+    throw new Error(`this user ${user.name} is already an admin`);
+  await user.updateOne({ role: "admin" });
+  return (data = {
+    message: "SUCCESSFUL",
+  });
+};
+
+const updateAdmin = async (data) => {
+const { userId } = data.query
+const updates = data.body
+
+const updatedAdmin = await User.findByIdAndUpdate(userId, updates, { new: true })
+if(!updatedAdmin) {
+  return (data = {
+    status: 404,
+    message: 'Admin not found'
+  })
+}
+else{
+  return (data = {
+    message: 'successful',
+    status:200,
+    updatedAdmin,
+    // updates
+  })
+}
 }
 module.exports = {
   superAdminRegister,
@@ -152,7 +185,9 @@ module.exports = {
   tokenRequest,
   tokenConfirmation,
   deleteAdmin,
-  getUserByAdmin
+  getUserByAdmin,
+  createAdmin,
+  updateAdmin
 };
 
 // try {
@@ -219,3 +254,16 @@ module.exports = {
 //       message: "failed",
 //     });
 //   }
+
+  // const adminExists = await SuperAdmin.findOne({ name }).$where({role:sRole}).gt(1)
+    // const userCount = await SuperAdmin.countDocuments({role: 'superAdmin'})
+    //   const userCount = SuperAdmin.countDocuments({role: sRole})
+    //   if(adminExists && adminExists > 2) throw new Error('cannot create Admin')
+    // if(adminExists.role === sRole){
+    // if(userCount > 1) throw new Error('cannot create Admin')
+    // }else{
+    //     throw new Error('failed')
+    // }
+    //   if(userCount && userCount > 2) throw new Error('limit reached. Cannot create new superAdmin')
+    //   if (adminExists && user && adminExists.role && user.role === sRole)
+    //     throw new Error("cannot create a new Admin");

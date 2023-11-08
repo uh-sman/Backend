@@ -77,27 +77,44 @@ const createListing = asyncHandler(async (req, res) => {
 });
 const deleteListing = asyncHandler(async(req, res) => {
     // const listing = await Listing.findById(req.params.id)
-  res.send({message:'helloooo'});
+    console.log('.....req.query',req.query)
+    const userId = req.query.userId
+    const property = await Listing.findById(userId)
+    if(!property) {
+      // res.status(404).json('property not found')
+      res.status(404)
+      throw new Error('property not found')
+    }else{
+      await property.deleteOne()
+      return res.json('property has been deleted successfully')
+    }
+  // res.send({message:'helloooo'});
   
 })
-const updateListing = (req, res) => {
-  res.send(req.body);
-};
-const getListing = asyncHandler(async(req, res) => {
-    // const {title} = req.body
-    const listing = await Listing.findById(req._id)
-//   res.send(title);
-// res.send({message:'helloooo'});
+const updateListing = asyncHandler( async (req, res) => {
+try{ let userId = req.query.userId
+ const updates = req.body
 
-  res.send({listing});
+ const updatedListing = await Listing.findByIdAndUpdate(userId, updates, { new: true })
+ if(!updatedListing) {
+  return res.status(404).json({ message: 'Failed to updated Listings' })
+ }
+return res.status(200).json(updatedListing)
+}
+catch(error){
+  return res.status(500).json({ error: "Error updating Listing" })
+}
+  // res.json(update)
 })
-// const createListing = (req,res) => {
-//     res.send(req.body)
-// }
-
+const getListing = asyncHandler(async(req, res) => {
+    let userId = req.query.userId
+    const listing = await Listing.find()
+  res.status(200).json(listing);
+})
 module.exports = {
   createListing,
   deleteListing,
   updateListing,
   getListing,
 };
+ 

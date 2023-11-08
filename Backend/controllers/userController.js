@@ -130,8 +130,9 @@ const profile = asyncHandler(async (req, res) => {
 });
 // TODO:GET PROFILE
 const getProfile = asyncHandler(async (req, res) => {
-  const get = await Profile.findOne({ Lastname: "Umar" });
-  res.send({ get });
+  let userId = req.query.userId
+  const user = await User.findById(userId)
+  res.json(user)
 });
 const generateToken = (id) => {
   return jwt.sign({ id }, process.env.JWT_SECRET, {

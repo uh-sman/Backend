@@ -115,7 +115,7 @@ const login = async (data) => {
    const user = await User.findOne({ email })
    const token = JWT.sign({_id: user._id}, JWTSecret)
    if(!user) throw new Error('user does not exist')
-    rateLimitMiddleWare(user._id)
+    // rateLimitMiddleWare(user._id)
    if(user && (await bcrypt.compare(password, user.password))){
     return (data = {
            message:"LOGIN SUCCESSFUL",

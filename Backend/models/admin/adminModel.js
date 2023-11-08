@@ -8,15 +8,25 @@ const superAdminSchema = new Schema ({
     //     required:true,
     //     ref:"user"
     // },
-    name:{
+    firstname:{
         type:String,
         required:[true,'username is required'],
-        unique:[true, 'admin with username already exists']
+        unique:[false, 'admin with username already exists']
+    },
+    lastname:{
+        type:String,
+        required:[true,'lastname is required'],
+        unique:[false, 'admin with username already exists']
     },
     email:{
         type:String,
         required:[true, 'email is required'],
         unique:[true,'email already exists']
+    },
+    phoneNo:{
+        type:String,
+        required:[true, 'phoneNo is required'],
+        unique:[true,'phoneNo already exists']
     },
     password:{
         type:String,

@@ -43,9 +43,9 @@ else{
 })
 
 const superAdmin = asyncHandler ( async (req, res, next) => {
-  const userRoles = await User.findOne({email : req.body.email, role: 'superAdmin'})
   let userRole = 'superAdmin'
-  const user = req.body
+  let userId = req.query.userId
+  const userRoles = await SuperAdmin.findById(userId)
   if(userRoles && userRoles.role === userRole){
     next()
   }

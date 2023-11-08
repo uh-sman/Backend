@@ -9,18 +9,21 @@ const {
     tokenConfirmationController,
     requestTokenController,
     deleteAdminController,
-    getUserByAdminController
+    getUserByAdminController,
+    createAdminController,
+    updateAdminController
 } = require('../controllers/admin/admin')
 
-const {protect,admin,superAdmin} = require('../middleware/index')
+const {protect,admin, superAdmin} = require('../middleware/index')
 
 router.route('/register').post(SuperAdminSignUpController)
-router.route('/user').get(getUserByAdminController)
+router.route('/user').get(superAdmin, getUserByAdminController)
 router.route('/login').post(superAdminLoginController)
 router.route('/tokenRequest').post(tokenRequestController)
+router.route('/admin').post(createAdminController).put(updateAdminController)
 router.route('/confirmToken').post(tokenConfirmationController)
 router.route('/requestToken').post(requestTokenController)
-router.route('/:userId').delete(deleteAdminController)
+router.route('/:userId').delete(protect, superAdmin, deleteAdminController)
 
 
 module.exports = router
