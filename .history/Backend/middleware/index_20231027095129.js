@@ -1,0 +1,71 @@
+const jwt = require("jsonwebtoken");
+const asyncHandler = require("express-async-handler");
+const User = require("../models/userModel");
+const SuperAdmin = require('../models/admin/adminModel')
+const protect = asyncHandler(async (req, res, next) => {
+  let token;
+
+  if (
+    req.headers.authorization &&
+    req.headers.authorization.startsWith("Bearer")
+  ) {
+    try {
+      // Get token from header
+      token = req.headers.authorization.split(" ")[1];
+
+      // Verify token
+      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+      // Get user from the token
+      req.user = await User.findById(decoded.id).select("-password");
+
+      next();
+    } catch (error) {
+        console.log(error)
+        res.status(401)
+        throw new Error('Not authorized')
+    }
+  }
+  if (!token) {
+    res.status(401)
+    throw new Error('Not authorized, no token')
+  }
+});
+
+const admin = asyncHandler(async (req,res,next) => {
+if(req.user && req.user.isAdmin){
+  next()
+}
+else{
+  res.status(401);
+  throw new Error('Not authorized ')
+}
+})
+// async function superAdmin  (userRole) {
+//   return (req, res, next) => {
+//     // const user = req.role;
+//     const {role} = req.body.role
+//     const userRole = await User.findOne()
+
+//     if(user && user.role === userRole){
+//       next()
+//     }else{
+//       res.status(403).send('Access denied not authorized')
+//     }
+//   }
+// }
+
+const superAdmin = asyncHandler ( async (req, res, next) => {
+  const userRoles = await User.findOne({email : req.body.email, role: 'superAdmin'})
+  let userRole = 'superAdmin'
+  const user = req.body
+  if(userRoles && userRoles.role === userRole){
+    next()
+  }
+  else{
+    res.status(403).send('Access denied not authorized')
+  }
+})
+
+module.exports = { protect, admin , superAdmin}
+
