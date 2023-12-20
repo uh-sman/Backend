@@ -26,7 +26,7 @@ const storage = multer.diskStorage({
   });
 
   const upload = multer({  storage: storage  })
-router.route('/register').post(upload.single('profilePicture'),registerUser)
+router.route('/register').post(registerUser)
 router.post('/login',loginUser)
 router.route('/user/:userId').get(getProfile)
 // update password route

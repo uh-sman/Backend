@@ -154,7 +154,7 @@ const login = async (data) => {
    if(user && (await bcrypt.compare(password, user.password))){
     return (data = {
            message:"LOGIN SUCCESSFUL",
-           userId: user._id,
+            _id: user._id,
             name: user.name,
             email: user.email,
             token: token,

@@ -58,7 +58,7 @@ const rateLimitMiddleWare = require('../../middleware/requestLimitMiddleware')
 
 
 const register = async (data) => {
-  const { password, email, roleName, name , avatar} = data.body
+  const { password, confirmPassword, email, roleName, name , avatar} = data.body
   console.log(data.body)
   // const imageFile = data.files.image
   // const imageFile = data.file
@@ -83,11 +83,11 @@ const register = async (data) => {
     if(user){
         throw new Error('User already exist')
     }
-    // let passwordCheck = password === confirmPassword
+    let passwordCheck = password === confirmPassword
 
-    // if(!passwordCheck){
-    //   throw new Error('passwords don`t match')
-    // }
+    if(!passwordCheck){
+      throw new Error('passwords don`t match')
+    }
  
      user = new User({
       name,
@@ -154,7 +154,7 @@ const login = async (data) => {
    if(user && (await bcrypt.compare(password, user.password))){
     return (data = {
            message:"LOGIN SUCCESSFUL",
-           userId: user._id,
+            _id: user._id,
             name: user.name,
             email: user.email,
             token: token,

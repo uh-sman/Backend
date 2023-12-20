@@ -58,10 +58,9 @@ const rateLimitMiddleWare = require('../../middleware/requestLimitMiddleware')
 
 
 const register = async (data) => {
-  const { password, email, roleName, name , avatar} = data.body
-  console.log(data.body)
+  const { password, confirmPassword, email, roleName, name , avatar} = data.body
   // const imageFile = data.files.image
-  // const imageFile = data.file
+  const imageFile = data.file
 
   // let form = new multiparty.Form({ maxFileSize: 10 * 1024 * 1024 })
 
@@ -83,24 +82,46 @@ const register = async (data) => {
     if(user){
         throw new Error('User already exist')
     }
-    // let passwordCheck = password === confirmPassword
+    let passwordCheck = password === confirmPassword
 
-    // if(!passwordCheck){
-    //   throw new Error('passwords don`t match')
-    // }
- 
-     user = new User({
-      name,
-      email,
-      password,
-      role: roleName,
-      avatar
-      // profilePicture: imageFile ? imageFile.filename : null
+    if(!passwordCheck){
+      throw new Error('passwords don`t match')
+    }
+
+    cloudinary.config({
+      cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+      api_key: process.env.CLOUDINARY_API_KEY,
+      api_secret: process.env.CLOUDINARY_API_SECRET,
     })
-    // console.log("Clinet request", (data.file ? data.file.filename : null))
-     await user.save()
 
-    const token = JWT.sign({ id: user._id }, JWTSecret)
+  //  (async function run () {
+  //   const result = await cloudinary.uploader.upload(avatar)
+  //   console.log('Successfully uploaded')
+  //   console.log(`Results: ${result.secure_url}`)
+  //  })()
+
+   const imageUpload = async () => {
+    const result = await cloudinary.uploader.upload(avatar)
+    console.log(result.secure_url, result.public_id)
+   }
+
+  // cloudinary.uploader.upload(avatar).then((result) => {
+  //   console.log(`Result: ${result.secure_url}`)
+  // }).catch((error) => {
+  //   console.log(`Error: ${error}`)
+  // })
+    //  user = new User({
+    //   name,
+    //   email,
+    //   password,
+    //   role: roleName,
+    //   avatar
+    //   // profilePicture: imageFile ? imageFile.filename : null
+    // })
+    // console.log("Clinet request", (data.file ? data.file.filename : null))
+    //  await user.save()
+
+    // const token = JWT.sign({ id: user._id }, JWTSecret)
 
 
     // const mailOptions = {
@@ -123,17 +144,17 @@ const register = async (data) => {
       // })
       // rateLimitMiddleWare(user._id)
       
-    return(data = {
-        userId: user._id,
-        email:user.email,
-        name: user.name,
-        token: token,
-        avatar: user.avatar.url
-    })
-    // return (data = {
-    //   message: 'helooooooooo',
-    //   imageFile:imageUpload,
+    // return(data = {
+    //     userId: user._id,
+    //     email:user.email,
+    //     name: user.name,
+    //     token: token,
+    //     avatar: user.avatar.url
     // })
+    return (data = {
+      message: 'helooooooooo',
+      imageFile:imageUpload,
+    })
 }
 
 const deleteUser = async (data) => {
@@ -154,7 +175,7 @@ const login = async (data) => {
    if(user && (await bcrypt.compare(password, user.password))){
     return (data = {
            message:"LOGIN SUCCESSFUL",
-           userId: user._id,
+            _id: user._id,
             name: user.name,
             email: user.email,
             token: token,

@@ -1,38 +1,52 @@
 const asyncHandler = require("express-async-handler");
 const Listing = require("../models/listingModel");
 const upload = require('../index')
+const cloudinary = require('cloudinary').v2;
 const createListing = asyncHandler( async (req, res) => {
   try{
-    const {
-      price,
-        title,
-        location,
-        description,
-        amenities,
-        nearestLandmark,
-        unitType,
-        distanceToLandmark,
-        photos,
-        paymentFormat
-    } = req.body
-
-    const newListing = new Listing({
-       price:price,
-        title:title,
-        location:location,
-        description:description,
-        amenities:amenities,
-        nearestLandmark:nearestLandmark,
-        unitType:unitType,
-        distanceToLandmark:distanceToLandmark,
-        // photos:req.file ? req.file.path : null,
-        photos:photos,
-        paymentFormat:paymentFormat
+    // const {
+    //   price,
+    //     title,
+    //     location,
+    //     description,
+    //     amenities,
+    //     nearestLandmark,
+    //     unitType,
+    //     distanceToLandmark,
+    //     photos,
+    //     paymentFormat
+    console.log('req.body mine',req.body)
+    console.log('photos',req.body.photos)
+    // } = req.body
+    
+    cloudinary.config({
+      cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+      api_key: process.env.CLOUDINARY_API_KEY,
+      api_secret: process.env.CLOUDINARY_API_SECRET,
     })
 
+    cloudinary.uploader.upload(req.body.photos).then((response) => {
 
-    await newListing.save();
-    res.status(201).json(newListing)
+    }).catch((error) => {
+      console.log('failed to cloud update',error)
+    })
+    // const newListing = new Listing({
+    //    price:price,
+    //     title:title,
+    //     location:location,
+    //     description:description,
+    //     amenities:amenities,
+    //     nearestLandmark:nearestLandmark,
+    //     unitType:unitType,
+    //     distanceToLandmark:distanceToLandmark,
+    //     // photos:req.file ? req.file.path : null,
+    //     photos:photos,
+    //     paymentFormat:paymentFormat
+    // })
+
+
+    // await newListing.save();
+    // res.status(201).json(newListing)
   }catch(error){
     console.log(error)
   }
