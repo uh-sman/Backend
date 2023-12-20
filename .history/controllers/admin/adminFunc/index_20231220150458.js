@@ -46,7 +46,7 @@ const superAdminRegister = async (data) => {
     phoneNo: admin.phoneNo,
     role: admin.role,
     token: token,
-    images: {images}
+    images: images
   });
 };
 const superAdminLogin = async (data) => {
