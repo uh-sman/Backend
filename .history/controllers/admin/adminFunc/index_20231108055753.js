@@ -8,7 +8,7 @@ const crypto = require("crypto");
 const bcryptSalt = process.env.BCRYPT_SALT;
 const JWT_SECRET = process.env.JWT_SECRET;
 const superAdminRegister = async (data) => {
-  const { firstname, password, email, lastname, phoneNo, role, images } = data;
+  const { firstname, password, email, lastname, phoneNo, role } = data;
   let sRole = "superAdmin";
   const adminExists = await SuperAdmin.findOne({ role: { $gt: 3 } });
 
@@ -26,7 +26,6 @@ const superAdminRegister = async (data) => {
     email,
     phoneNo,
     password: hashedPassword,
-    images: images
     // token:
   });
   // await User.create({
