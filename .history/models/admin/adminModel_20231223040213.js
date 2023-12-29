@@ -37,11 +37,14 @@ const superAdminSchema = new Schema ({
         ref:"user",
         default:'superAdmin'
     },
-    photo: String,
+    images: {
+        type: String,
+    },
     isVerified:{
         type:Boolean,
         default:false
     },
+    max: Number,
 })   
 
 module.exports = mongoose.model('superAdmin', superAdminSchema)  

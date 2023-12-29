@@ -10,39 +10,61 @@ const JWT_SECRET = process.env.JWT_SECRET;
 const superAdminRegister = async (data) => {
   const { firstname, password, email, lastname, phoneNo, role, photo } = data.body;
   // let sRole = "superAdmin";
-  const adminExists = await SuperAdmin.findOne({ role: { $gt: 3 } });
+  // const adminExists = await SuperAdmin.findOne({ role: { $gt: 3 } });
 
-  const salt = await bcrypt.genSalt(10);
-  const hashedPassword = await bcrypt.hash(password, salt);
-  // const user = await User.findOne({ email, role: sRole });
-  if (adminExists)
-    throw new Error(
-      "cannot create new superAdmin only one SuperAdmin is allowed"
-    );
+  // const salt = await bcrypt.genSalt(10);
+  // const hashedPassword = await bcrypt.hash(password, salt);
+  // // const user = await User.findOne({ email, role: sRole });
+  // if (adminExists)
+  //   throw new Error(
+  //     "cannot create new superAdmin only one SuperAdmin is allowed"
+  //   );
     // console.log('superAdmin register', firstname, password, email, lastname, phoneNo, role, photo)
-  const admin = await SuperAdmin.create({
-    firstname,
-    lastname,
-    email,
-    phoneNo,
-    password: hashedPassword,
-    photo
-  });
+  // const admin = await SuperAdmin.create({
+  //   firstname,
+  //   lastname,
+  //   email,
+  //   phoneNo,
+  //   password: hashedPassword,
+  //   images: images
+  //   // token:
+  // });
+  // await User.create({
+  //   userId: admin._id,
+  //   email: email,
+  //   name: name,
+  //   password: hashedPassword,
+  //   role: sRole,
+  // });
+  // const token = JWT.sign({ id: admin._id }, JWT_SECRET);
+  // return (data = {
+  //   message: "Admin created successfully",
+  //   id: admin._id,
+  //   firstname: admin.firstname,
+  //   lastname: admin.lastname,
+  //   email: admin.email,
+  //   phoneNo: admin.phoneNo,
+  //   role: admin.role,
+  //   token: token,
+  //   images: {
+  //     images
+  //   }
+  // });
 
-  const token = JWT.sign({ id: admin._id }, JWT_SECRET);
+  // return (data = {
+  //   message: "Admin created successfully",
+  //   // id: admin._id,
+  //   firstname: firstname,
+  //   lastname: lastname,
+  //   email: email,
+  //   phoneNo: phoneNo,
+  //   role: role,
+  //   // token: token,
+  //   images
+  // });
   return (data = {
-    message: "Admin created successfully",
-    id: admin._id,
-    firstname: admin.firstname,
-    lastname: admin.lastname,
-    email: admin.email,
-    phoneNo: admin.phoneNo,
-    role: admin.role,
-    token: token,
-    photo:{
-      photo
-    }
-  });
+    firstname, password, email, lastname, phoneNo, role, photo 
+  })
 };
 const superAdminLogin = async (data) => {
   const { password, email } = data.body;

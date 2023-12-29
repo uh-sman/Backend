@@ -2,6 +2,7 @@ const express = require("express");
 const path = require('path')
 const colors = require("colors");
 const dotenv = require("dotenv").config();
+const multer = require('multer')
 const docs = require('./docs/index')
 const morgan  = require("morgan");
 const swaggerUI = require('swagger-ui-express')
@@ -10,6 +11,7 @@ const {errorHandler,notFound} = require('./middleware/errorMiddleware')
 const listingRoutes = require('./routes/listings/index')
 const superAdmin = require('./routes/superAdmin')
 const connectDB = require("./config/db");
+const cloudinary = require('cloudinary').v2
 // const { CloudinaryStorage } = cloudinary
 const cors = require('cors')
 const app = express();
@@ -50,8 +52,7 @@ app.use('/uploads',  express.static(path.join(_dirname, '/uploads')));
 app.use(notFound);
 app.use(errorHandler);
 
-// const PORT = process.env.PORT  || 4000;
-const PORT = 4000;
+const PORT = process.env.PORT  || 4000;
 app.listen(PORT, () => {
   console.log(`Server running in ${process.env.NODE_ENV} mode on port ${PORT}`.yellow.bold);
 });

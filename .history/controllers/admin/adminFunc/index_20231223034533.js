@@ -8,8 +8,8 @@ const crypto = require("crypto");
 const bcryptSalt = process.env.BCRYPT_SALT;
 const JWT_SECRET = process.env.JWT_SECRET;
 const superAdminRegister = async (data) => {
-  const { firstname, password, email, lastname, phoneNo, role, photo } = data.body;
-  // let sRole = "superAdmin";
+  const { firstname, password, email, lastname, phoneNo, role, images } = data;
+  let sRole = "superAdmin";
   const adminExists = await SuperAdmin.findOne({ role: { $gt: 3 } });
 
   const salt = await bcrypt.genSalt(10);
@@ -19,16 +19,23 @@ const superAdminRegister = async (data) => {
     throw new Error(
       "cannot create new superAdmin only one SuperAdmin is allowed"
     );
-    // console.log('superAdmin register', firstname, password, email, lastname, phoneNo, role, photo)
+
   const admin = await SuperAdmin.create({
     firstname,
     lastname,
     email,
     phoneNo,
     password: hashedPassword,
-    photo
+    images: images
+    // token:
   });
-
+  // await User.create({
+  //   userId: admin._id,
+  //   email: email,
+  //   name: name,
+  //   password: hashedPassword,
+  //   role: sRole,
+  // });
   const token = JWT.sign({ id: admin._id }, JWT_SECRET);
   return (data = {
     message: "Admin created successfully",
@@ -39,8 +46,8 @@ const superAdminRegister = async (data) => {
     phoneNo: admin.phoneNo,
     role: admin.role,
     token: token,
-    photo:{
-      photo
+    images: {
+      images
     }
   });
 };

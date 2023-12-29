@@ -37,7 +37,7 @@ const superAdminSchema = new Schema ({
         ref:"user",
         default:'superAdmin'
     },
-    photo: String,
+    image: String,
     isVerified:{
         type:Boolean,
         default:false

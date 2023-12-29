@@ -27,8 +27,15 @@ const superAdminRegister = async (data) => {
     phoneNo,
     password: hashedPassword,
     photo
+    // token:
   });
-
+  // await User.create({
+  //   userId: admin._id,
+  //   email: email,
+  //   name: name,
+  //   password: hashedPassword,
+  //   role: sRole,
+  // });
   const token = JWT.sign({ id: admin._id }, JWT_SECRET);
   return (data = {
     message: "Admin created successfully",
@@ -43,6 +50,21 @@ const superAdminRegister = async (data) => {
       photo
     }
   });
+
+  // return (data = {
+  //   message: "Admin created successfully",
+  //   // id: admin._id,
+  //   firstname: firstname,
+  //   lastname: lastname,
+  //   email: email,
+  //   phoneNo: phoneNo,
+  //   role: role,
+  //   // token: token,
+  //   images
+  // });
+  // return (data = {
+  //   firstname, password, email, lastname, phoneNo, role, photo 
+  // })
 };
 const superAdminLogin = async (data) => {
   const { password, email } = data.body;

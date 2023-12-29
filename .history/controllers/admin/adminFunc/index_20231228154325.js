@@ -43,6 +43,21 @@ const superAdminRegister = async (data) => {
       photo
     }
   });
+
+  // return (data = {
+  //   message: "Admin created successfully",
+  //   // id: admin._id,
+  //   firstname: firstname,
+  //   lastname: lastname,
+  //   email: email,
+  //   phoneNo: phoneNo,
+  //   role: role,
+  //   // token: token,
+  //   images
+  // });
+  // return (data = {
+  //   firstname, password, email, lastname, phoneNo, role, photo 
+  // })
 };
 const superAdminLogin = async (data) => {
   const { password, email } = data.body;
